@@ -44,7 +44,6 @@ public class KelpModsScreen extends Screen {
         toggle("Potion Effects", () -> c.potions, v -> c.potions = v);
         toggle("Combo Counter", () -> c.combo, v -> c.combo = v);
         toggle("Waypoints", () -> c.waypoints, v -> c.waypoints = v);
-        toggle("Hitboxes", () -> c.hitboxes, v -> c.hitboxes = v);
         toggle("Custom Crosshair", () -> c.customCrosshair, v -> c.customCrosshair = v);
         action(Text.literal("Style: " + KelpConfig.STYLES[c.crosshairStyle]), b -> {
             c.crosshairStyle = (c.crosshairStyle + 1) % KelpConfig.STYLES.length; KelpConfig.save();
