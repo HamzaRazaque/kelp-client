@@ -1,0 +1,1 @@
+{ "required": true, "package": "com.kelpclient.mixin", "compatibilityLevel": "JAVA_21", "client": ["MinecraftClientAccessor", "PlayerEntityMixin", "PlayerListHudMixin"], "injectors": { "defaultRequire": 1 } }
