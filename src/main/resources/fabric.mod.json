@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "kelpclient",
+  "version": "${version}",
+  "name": "Kelp Client",
+  "description": "Kelp Client: HUD, gameplay, crosshair, waypoints and social mods with the Right Shift menu.",
+  "authors": ["Kelp"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": { "client": ["com.kelpclient.KelpClient"] },
+  "mixins": ["kelpclient.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

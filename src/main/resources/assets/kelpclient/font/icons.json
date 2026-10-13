@@ -1,0 +1,1 @@
+{ "providers": [ { "type": "bitmap", "file": "kelpclient:font/kelp.png", "ascent": 7, "height": 8, "chars": ["\uE000"] } ] }
