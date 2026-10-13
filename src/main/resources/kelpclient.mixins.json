@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.kelpclient.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["ChatHudMixin", "InGameHudMixin"],
+  "injectors": { "defaultRequire": 0 }
+}
