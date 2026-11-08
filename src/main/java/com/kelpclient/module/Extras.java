@@ -5,7 +5,7 @@ import com.kelpclient.module.Module.Kind;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.ParticlesMode;
+import net.minecraft.client.option.SimpleOption;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.MathHelper;
@@ -82,19 +82,30 @@ public final class Extras {
 	}
 
 	static class ParticlesMod extends Module {
-		private ParticlesMode saved;
-		private static final ParticlesMode[] MODES = {ParticlesMode.ALL, ParticlesMode.DECREASED, ParticlesMode.MINIMAL};
+		private Integer saved;
 		ParticlesMod() {
 			super("particles", "Custom Particles", "Choose how many vanilla particles you see", "star", Cat.VISUAL, Kind.LOGIC, Anchor.STACK_LEFT);
 			set(Setting.cycle("mode", "Particles", 1, "All", "Decreased", "Minimal"));
 		}
-		@Override public void onEnable(MinecraftClient mc) { saved = mc.options.getParticles().getValue(); }
-		@Override public void onTick(MinecraftClient mc) {
-			if (saved == null) saved = mc.options.getParticles().getValue();
-			ParticlesMode want = MODES[Math.max(0, Math.min(2, get("mode")))];
-			if (mc.options.getParticles().getValue() != want) mc.options.getParticles().setValue(want);
+
+		// The particle-level enum moved packages between versions, so it is handled by ordinal (ALL, DECREASED, MINIMAL).
+		private static int current(MinecraftClient mc) { return ((Enum<?>) mc.options.getParticles().getValue()).ordinal(); }
+
+		@SuppressWarnings({"rawtypes", "unchecked"})
+		private static void put(MinecraftClient mc, int ord) {
+			SimpleOption o = mc.options.getParticles();
+			Enum cur = (Enum) o.getValue();
+			Object[] all = cur.getDeclaringClass().getEnumConstants();
+			o.setValue(all[Math.max(0, Math.min(ord, all.length - 1))]);
 		}
-		@Override public void onDisable(MinecraftClient mc) { if (saved != null) { mc.options.getParticles().setValue(saved); saved = null; } }
+
+		@Override public void onEnable(MinecraftClient mc) { saved = current(mc); }
+		@Override public void onTick(MinecraftClient mc) {
+			if (saved == null) saved = current(mc);
+			int want = Math.max(0, Math.min(2, get("mode")));
+			if (current(mc) != want) put(mc, want);
+		}
+		@Override public void onDisable(MinecraftClient mc) { if (saved != null) { put(mc, saved); saved = null; } }
 	}
 
 	static class BobMod extends Module {
