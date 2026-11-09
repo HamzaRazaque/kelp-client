@@ -20,4 +20,10 @@ Social: Friends Online, Chat Timestamps
 
 ## Build
 Check `gradle.properties` against https://fabricmc.net/develop (Minecraft 1.21.11).
-`./gradlew build` -> `build/libs/kelpclient-1.2.0.jar`
+`./gradlew build` -> `build/libs/kelpclient-1.3.0.jar`
+
+## New in 1.3.0
+- Kelp theme colours (#071411 / #0D211C / #122B24 / #1D5545, accents #39E6A2 and #42C7D5) and mint line icons.
+- Main menu background: a slowly drifting underwater kelp forest with bubbles. Replay Mod / Flashback get icon tiles (top-left) when installed.
+- Every module has a Keybind (default None) and HUD modules have a Size setting, both in the gear screen.
+- Custom Cape (`.minecraft/config/kelpclient/cape.png`, any picture) and Custom Skin (`skin.png`, 64x64) cosmetics; new axolotl and red panda models.

@@ -14,6 +14,9 @@ public class KButton extends ButtonWidget {
 	public int iconScale = 1;
 	/** 0..1 scale used for pop-in animations (1 = normal). */
 	public float pop = 1f;
+	/** Optional picture drawn instead of a pixel icon (e.g. another mod's own icon). */
+	public net.minecraft.util.Identifier tex; public int texW, texH;
+	public KButton texture(net.minecraft.util.Identifier id, int w, int h) { this.tex = id; this.texW = w; this.texH = h; return this; }
 	public BooleanSupplier on = () -> false;
 	private float hov, onA;
 
@@ -57,7 +60,10 @@ public class KButton extends ButtonWidget {
 				boolean lab = !label.isEmpty();
 				Theme.box(c, x, y, w, h, Theme.lerp(Theme.PANEL2, Theme.HOVER, hov), Theme.lerp(Theme.BORDER, Theme.ACCENT, Math.max(hov, onA)));
 				c.fill(x + 1, y + 1, x + w - 1, y + 2, Theme.withAlpha(0xFFFFFF, 14 + (int) (hov * 26)));
-				if (icon != null) {
+				if (tex != null) {
+					int s = Math.min(w, h) - 8;
+					c.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, tex, x + (w - s) / 2, y + (h - s) / 2 - Math.round(hov * 2), 0f, 0f, s, s, texW, texH, texW, texH);
+				} else if (icon != null) {
 					int box = lab ? h - 20 : h - 6;
 					int s = Icons.fit(icon, box);
 					int cy = lab ? y + 4 + box / 2 : y + h / 2;
@@ -68,21 +74,21 @@ public class KButton extends ButtonWidget {
 			}
 			case SWITCH: {
 				int tw = Math.min(26, w), th = Math.min(12, h), tx = x + w - tw, ty = y + (h - th) / 2;
-				c.fill(tx, ty, tx + tw, ty + th, Theme.lerp(0xFF3A4A45, 0xFF2FD36B, onA));
+				c.fill(tx, ty, tx + tw, ty + th, Theme.lerp(0xFF3A4A45, 0xFF39E6A2, onA));
 				int kw = th - 4;
 				int kx = tx + 2 + Math.round((tw - kw - 4) * onA);
 				c.fill(kx, ty + 2, kx + kw, ty + 2 + kw, 0xFFFFFFFF);
 				break;
 			}
 			case STATE: {
-				int base = Theme.lerp(0xFF16231F, Theme.HOVER, hov);
-				c.fill(x, y, x + w, y + h, Theme.lerp(base, 0xFF1B6B3A, onA));
+				int base = Theme.lerp(0xFF0D211C, Theme.HOVER, hov);
+				c.fill(x, y, x + w, y + h, Theme.lerp(base, 0xFF1D5545, onA));
 				Theme.centered(c, isOn ? "Enabled" : "Disabled", x + w / 2, y + (h - 8) / 2, Theme.lerp(Theme.DIM, 0xFFFFFFFF, onA));
 				break;
 			}
 			default: {
 				int fill, border;
-				if (mode == Mode.PRIMARY) { fill = Theme.lerp(0xFF16724F, 0xFF1F8A5E, hov); border = Theme.BORDER; }
+				if (mode == Mode.PRIMARY) { fill = Theme.lerp(0xFF1D5545, 0xFF247A62, hov); border = Theme.BORDER; }
 				else if (mode == Mode.TAB) { fill = Theme.lerp(Theme.lerp(Theme.PANEL2, Theme.HOVER, hov), Theme.SEL, onA); border = Theme.lerp(Theme.BORDER, Theme.ACCENT, onA); }
 				else { fill = Theme.lerp(Theme.PANEL2, Theme.HOVER, hov); border = Theme.lerp(Theme.BORDER, Theme.ACCENT, hov * 0.6f); }
 				Theme.box(c, x, y, w, h, fill, border);

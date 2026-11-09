@@ -32,6 +32,8 @@ public final class Config {
 			JsonObject o = new JsonObject();
 			o.addProperty("enabled", m.enabled);
 			if (m.placed()) { o.addProperty("x", m.x); o.addProperty("y", m.y); }
+			o.addProperty("key", m.key);
+			o.addProperty("scale", m.scale);
 			JsonObject s = new JsonObject();
 			for (Setting st : m.settings) s.addProperty(st.key, st.v);
 			o.add("settings", s);
@@ -60,6 +62,8 @@ public final class Config {
 				JsonObject o = mods.getAsJsonObject(m.id);
 				if (o.has("enabled")) m.enabled = o.get("enabled").getAsBoolean();
 				if (o.has("x") && o.has("y")) { m.x = o.get("x").getAsInt(); m.y = o.get("y").getAsInt(); }
+				if (o.has("key")) m.key = o.get("key").getAsInt();
+				if (o.has("scale")) m.scale = Math.max(50, Math.min(200, o.get("scale").getAsInt()));
 				if (o.has("settings")) {
 					JsonObject s = o.getAsJsonObject("settings");
 					for (Setting st : m.settings) if (s.has(st.key)) { st.v = s.get(st.key).getAsInt(); st.clamp(); }

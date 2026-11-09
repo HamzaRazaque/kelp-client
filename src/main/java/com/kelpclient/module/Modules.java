@@ -52,6 +52,8 @@ public final class Modules {
 		for (Module m : ALL) {
 			m.setEnabled(m.defEnabled);
 			m.resetPos();
+			m.key = -1;
+			m.scale = 100;
 			for (Setting s : m.settings) s.v = s.def;
 		}
 		Config.save();

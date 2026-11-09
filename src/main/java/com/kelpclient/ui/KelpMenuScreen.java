@@ -38,7 +38,7 @@ public class KelpMenuScreen extends Screen {
 		panelH = HEAD + ROWS * tile + (ROWS - 1) * GAP + PAD + 2;
 		panelX = (width - panelW) / 2;
 		panelY = (height - panelH) / 2; // dead centre
-		String[] icons = {"kelp", "shirt", "pin", "person", "arrows", "gear"};
+		String[] icons = {"grid", "sparkle", "pin", "users", "arrows", "gear"};
 		String[] names = {"Mods", "Cosmetics", "Waypoints", "Social", "Transfer", "Settings"};
 		for (int i = 0; i < COLS * ROWS; i++) {
 			final int idx = i;
@@ -99,9 +99,9 @@ public class KelpMenuScreen extends Screen {
 		HudRenderer.layout(client, width, height);
 		for (Map.Entry<Module, int[]> e : HudRenderer.POS.entrySet()) {
 			int[] p = e.getValue();
-			e.getKey().draw(c, client, p[0], p[1], true);
+			e.getKey().drawScaled(c, client, p[0], p[1], true);
 			boolean hov = e.getKey() == drag || (drag == null && inside(mx, my, p) && !inPanel(mx, my));
-			Theme.outline(c, p[0] - 1, p[1] - 1, p[2] + 2, p[3] + 2, hov ? Theme.pulse() : 0x663CE07A);
+			Theme.outline(c, p[0] - 1, p[1] - 1, p[2] + 2, p[3] + 2, hov ? Theme.pulse() : 0x6639E6A2);
 		}
 
 		// tiles pop in one after another, and shrink away together on close

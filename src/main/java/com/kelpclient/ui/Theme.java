@@ -5,8 +5,8 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 
 public final class Theme {
-	public static final int BG = 0xFF081411, PANEL = 0xFF0E2420, PANEL2 = 0xFF123029, BORDER = 0xFF1E5043,
-			ACCENT = 0xFF3CE07A, SEL = 0xFF1B6B4D, TEXT = 0xFFE9FFF4, DIM = 0xFF86AA9C, HOVER = 0xFF184A3C,
+	public static final int BG = 0xFF071411, PANEL = 0xFF0D211C, PANEL2 = 0xFF122B24, BORDER = 0xFF1D5545,
+			ACCENT = 0xFF39E6A2, ACCENT2 = 0xFF42C7D5, SEL = 0xFF1D5545, TEXT = 0xFFE9FFF4, DIM = 0xFF86AA9C, HOVER = 0xFF18392F,
 			OFF = 0xFF2B3A36, DIM_BG = 0xC0050D0B, RED = 0xFFE5484D;
 
 	private static TextRenderer tr() { return MinecraftClient.getInstance().textRenderer; }
@@ -27,7 +27,9 @@ public final class Theme {
 	public static int pulse() { return withAlpha(ACCENT, 170 + (int) (85 * Math.sin(System.currentTimeMillis() / 320.0))); }
 
 	public static void box(DrawContext c, int x, int y, int w, int h, int fill, int border) {
-		c.fill(x, y, x + w, y + h, border);
+		// chamfered corners give the soft "rounded card" look of the Kelp theme
+		c.fill(x + 1, y, x + w - 1, y + h, border);
+		c.fill(x, y + 1, x + w, y + h - 1, border);
 		c.fill(x + 1, y + 1, x + w - 1, y + h - 1, fill);
 	}
 

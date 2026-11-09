@@ -57,7 +57,7 @@ public class ModSettingsScreen extends KScreen {
 			if (idx >= mods.size()) break;
 			final Module m = mods.get(idx);
 			int y = ry + i * (ROW_H + GAP);
-			if (!m.settings.isEmpty() || m.kind == Module.Kind.HUD) {
+			if (true) { // every module has options now (keybind)
 				KButton gear = new KButton(KButton.Mode.GHOST, rx + rw - 62, y + 6, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
 				rowW.add(gear); addDrawableChild(gear);
 			}

@@ -114,7 +114,7 @@ public class ModGridScreen extends KScreen {
 				final Module m = shown.get(idx);
 				int x = gx + c * (tile + GAP), y = gy + r * (tile + GAP);
 				cells.add(new Object[]{m, x, y});
-				if (!m.settings.isEmpty() || m.kind == Module.Kind.HUD) {
+				if (true) { // every module has options now (keybind)
 					KButton gear = new KButton(KButton.Mode.GHOST, x + 4, y + tile - 20, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
 					gridW.add(gear); addDrawableChild(gear);
 				}

@@ -15,7 +15,7 @@ public final class HudRenderer {
 		int leftY = 4, rightY = 40;
 		for (Module m : Modules.ALL) {
 			if (!m.enabled || m.kind != Module.Kind.HUD) continue;
-			int w = m.w(mc), h = m.h(mc), x, y;
+			int w = m.sw(mc), h = m.sh(mc), x, y;
 			if (m.placed()) {
 				x = Math.max(0, Math.min(m.x, sw - w));
 				y = Math.max(0, Math.min(m.y, sh - h));
@@ -43,7 +43,7 @@ public final class HudRenderer {
 				layout(mc, sw, sh);
 				for (Map.Entry<Module, int[]> e : POS.entrySet()) {
 					int[] p = e.getValue();
-					e.getKey().draw(c, mc, p[0], p[1], false);
+					e.getKey().drawScaled(c, mc, p[0], p[1], false);
 				}
 			}
 			for (Module m : Modules.ALL) if (m.enabled && m.kind == Module.Kind.OVERLAY) m.overlay(c, mc, sw, sh);
