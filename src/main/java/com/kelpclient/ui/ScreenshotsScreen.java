@@ -8,11 +8,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/** In-game screenshot gallery: every screenshot you have taken, shown inside Minecraft. */
+/** In-game screenshot gallery: square, sharp thumbnails of every screenshot you have taken. */
 public class ScreenshotsScreen extends KScreen {
-	private static final int CELLS_W = 48, CELLS_H = 27, S = 2, TILE_W = CELLS_W * S + 8, TILE_H = CELLS_H * S + 26, GAP = 6;
+	private static final int GAP = 6, TARGET = 84;
 	private List<File> files = new ArrayList<>();
-	private int cols, rows, rowOff, gx, gy;
+	private int cols, rows, rowOff, gx, gy, gh, tile;
 	private final List<ClickableWidget> tileW = new ArrayList<>();
 
 	public ScreenshotsScreen(Screen parent) { super("SCREENSHOTS", parent); }
@@ -28,9 +28,12 @@ public class ScreenshotsScreen extends KScreen {
 	@Override
 	protected void build() {
 		files = ShotCache.list(client);
-		cols = Math.max(1, (pw - 20 + GAP) / (TILE_W + GAP));
-		rows = Math.max(1, (ph - 30 - 34 + GAP) / (TILE_H + GAP));
-		gx = px + (pw - (cols * TILE_W + (cols - 1) * GAP)) / 2;
+		int gw = pw - 20 - 8;
+		cols = Math.max(2, (gw + GAP) / (TARGET + GAP));
+		tile = Math.min(120, (gw - (cols - 1) * GAP) / cols);
+		gh = ph - 28 - 34;
+		rows = Math.max(1, (gh + GAP) / (tile + GAP));
+		gx = px + 10 + (gw - (cols * tile + (cols - 1) * GAP)) / 2;
 		gy = py + 28;
 		rebuild();
 	}
@@ -45,15 +48,23 @@ public class ScreenshotsScreen extends KScreen {
 				int idx = (rowOff + r) * cols + c;
 				if (idx >= files.size()) break;
 				final int index = idx;
-				KButton hit = new KButton(KButton.Mode.HIT, gx + c * (TILE_W + GAP), gy + r * (TILE_H + GAP), TILE_W, TILE_H, "", null,
+				KButton hit = new KButton(KButton.Mode.HIT, gx + c * (tile + GAP), gy + r * (tile + GAP), tile, tile, "", null,
 						b -> client.setScreen(new ScreenshotViewScreen(this, files, index)));
 				tileW.add(hit); addDrawableChild(hit);
 			}
 		}
 	}
 
+	/** "2026-11-08_19.07.45.png" becomes "11-08 19:07". */
+	static String label(String file) {
+		String n = file.replace(".png", "");
+		if (n.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}\\.\\d{2}\\.\\d{2}.*")) return n.substring(5, 10) + " " + n.substring(11, 13) + ":" + n.substring(14, 16);
+		return n;
+	}
+
 	@Override
 	protected void drawContent(DrawContext c, int mx, int my) {
+		ShotCache.beginFrame();
 		String count = files.size() + (files.size() == 1 ? " screenshot" : " screenshots");
 		Theme.text(c, count, px + pw - 10 - Theme.tw(count), py + 10, Theme.DIM);
 		if (files.isEmpty()) {
@@ -64,28 +75,29 @@ public class ScreenshotsScreen extends KScreen {
 		for (int r = 0; r < rows; r++) {
 			for (int col = 0; col < cols; col++) {
 				int idx = (rowOff + r) * cols + col;
-				if (idx >= files.size()) return;
+				if (idx >= files.size()) break;
 				File f = files.get(idx);
-				int x = gx + col * (TILE_W + GAP), y = gy + r * (TILE_H + GAP);
-				Theme.box(c, x, y, TILE_W, TILE_H, Theme.PANEL, Theme.BORDER);
-				ShotCache.Img img = ShotCache.get(f, CELLS_W, CELLS_H);
-				if (img == null) {
-					Theme.centered(c, "Loading...", x + TILE_W / 2, y + 4 + CELLS_H * S / 2 - 4, Theme.DIM);
-				} else if (img.w == 0) {
-					Theme.centered(c, "Unreadable", x + TILE_W / 2, y + 4 + CELLS_H * S / 2 - 4, Theme.RED);
+				int x = gx + col * (tile + GAP), y = gy + r * (tile + GAP);
+				boolean over = mx >= x && mx < x + tile && my >= y && my < y + tile;
+				Theme.box(c, x, y, tile, tile, 0xFF050B09, over ? Theme.ACCENT : Theme.BORDER);
+				ShotCache.Tex t = ShotCache.get(f, true);
+				if (t == null) {
+					Theme.centered(c, "...", x + tile / 2, y + tile / 2 - 4, Theme.DIM);
+				} else if (t.failed) {
+					Theme.centered(c, "Unreadable", x + tile / 2, y + tile / 2 - 4, Theme.RED);
 				} else {
-					ShotCache.draw(c, img, x + (TILE_W - img.w * S) / 2, y + 4 + (CELLS_H - img.h) * S / 2, S);
+					ShotCache.draw(c, t, x + 1, y + 1, tile - 2, tile - 2);
 				}
-				String name = f.getName().replace(".png", "");
-				Theme.text(c, Theme.fit(name, TILE_W - 8), x + 4, y + TILE_H - 14, Theme.DIM);
+				c.fill(x + 1, y + tile - 13, x + tile - 1, y + tile - 1, 0xB0050D0B);
+				Theme.text(c, Theme.fit(label(f.getName()), tile - 8), x + 4, y + tile - 11, over ? Theme.TEXT : Theme.DIM);
 			}
 		}
 		int total = (files.size() + cols - 1) / cols;
 		if (total > rows) {
-			int bh = ph - 30 - 34, th = Math.max(16, bh * rows / total);
-			int ty = gy + (bh - th) * rowOff / Math.max(1, total - rows);
-			c.fill(px + pw - 7, gy, px + pw - 4, gy + bh, 0xFF10201C);
-			c.fill(px + pw - 7, ty, px + pw - 4, ty + th, Theme.ACCENT);
+			int th = Math.max(16, gh * rows / total);
+			int ty = gy + (gh - th) * rowOff / Math.max(1, total - rows);
+			c.fill(px + pw - 12, gy, px + pw - 9, gy + gh, 0xFF10201C);
+			c.fill(px + pw - 12, ty, px + pw - 9, ty + th, Theme.ACCENT);
 		}
 	}
 

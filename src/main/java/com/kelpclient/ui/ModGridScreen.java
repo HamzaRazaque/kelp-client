@@ -20,8 +20,8 @@ import java.util.Map;
 public class ModGridScreen extends KScreen {
 	private Cat filter;
 	private String query = "";
-	private int rowOff, cols, rows, gx, gy, gw, gh, tileW;
-	private static final int TILE_H = 62, GAP = 6;
+	private int rowOff, cols, rows, gx, gy, gw, gh, tile;
+	private static final int GAP = 6, TARGET = 86;
 	private int preset = -1;
 	private final List<ClickableWidget> gridW = new ArrayList<>();
 	private final List<Object[]> cells = new ArrayList<>(); // {Module, x, y}
@@ -42,9 +42,9 @@ public class ModGridScreen extends KScreen {
 
 	@Override
 	protected void build() {
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 22, py + 6, 14, 14, "x", null, b -> close()));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 22 - 4 - 56, py + 6, 56, 14, "Shots", "camera", b -> client.setScreen(new ScreenshotsScreen(this))));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 22 - 8 - 56 - 50, py + 6, 50, 14, "Mods", "kelp", b -> client.setScreen(new ModSettingsScreen(this, Cat.HUD))));
+		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26, py + 4, 18, 18, "x", null, b -> close()));
+		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26 - 4 - 62, py + 4, 62, 18, "Shots", "camera", b -> client.setScreen(new ScreenshotsScreen(this))));
+		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26 - 8 - 62 - 58, py + 4, 58, 18, "Mods", "kelp", b -> client.setScreen(new ModSettingsScreen(this, Cat.HUD))));
 
 		int tx = px + 10, ty = py + 28;
 		List<Object> tabs = new ArrayList<>();
@@ -81,9 +81,11 @@ public class ModGridScreen extends KScreen {
 		gy = ry + 24;
 		gw = pw - 20 - 8;
 		gh = py + ph - 10 - gy;
-		cols = Math.max(2, Math.min(4, (gw + GAP) / (110 + GAP)));
-		tileW = (gw - (cols - 1) * GAP) / cols;
-		rows = Math.max(1, (gh + GAP) / (TILE_H + GAP));
+		// square tiles: pick the column count first, then the tile size follows from the width
+		cols = Math.max(3, (gw + GAP) / (TARGET + GAP));
+		tile = Math.min(108, (gw - (cols - 1) * GAP) / cols);
+		gx = px + 10 + (gw - (cols * tile + (cols - 1) * GAP)) / 2;
+		rows = Math.max(1, (gh + GAP) / (tile + GAP));
 		rebuildGrid();
 	}
 
@@ -110,15 +112,15 @@ public class ModGridScreen extends KScreen {
 				int idx = (rowOff + r) * cols + c;
 				if (idx >= shown.size()) break;
 				final Module m = shown.get(idx);
-				int x = gx + c * (tileW + GAP), y = gy + r * (TILE_H + GAP);
+				int x = gx + c * (tile + GAP), y = gy + r * (tile + GAP);
 				cells.add(new Object[]{m, x, y});
 				if (!m.settings.isEmpty() || m.kind == Module.Kind.HUD) {
-					KButton gear = new KButton(KButton.Mode.GHOST, x + 4, y + TILE_H - 20, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
+					KButton gear = new KButton(KButton.Mode.GHOST, x + 4, y + tile - 20, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
 					gridW.add(gear); addDrawableChild(gear);
 				}
-				KButton st = new KButton(KButton.Mode.STATE, x + 22, y + TILE_H - 19, tileW - 26, 14, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); }).on(() -> m.enabled);
+				KButton st = new KButton(KButton.Mode.STATE, x + 22, y + tile - 19, tile - 26, 14, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); }).on(() -> m.enabled);
 				gridW.add(st); addDrawableChild(st);
-				KButton hit = new KButton(KButton.Mode.HIT, x, y, tileW, TILE_H - 22, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); });
+				KButton hit = new KButton(KButton.Mode.HIT, x, y, tile, tile - 22, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); });
 				gridW.add(hit); addDrawableChild(hit);
 			}
 		}
@@ -130,15 +132,17 @@ public class ModGridScreen extends KScreen {
 		for (Object[] cell : cells) {
 			Module m = (Module) cell[0];
 			int x = (Integer) cell[1], y = (Integer) cell[2];
-			boolean over = mx >= x && mx < x + tileW && my >= y && my < y + TILE_H;
+			boolean over = mx >= x && mx < x + tile && my >= y && my < y + tile;
 			float g = glow.getOrDefault(m, 0f);
 			g += ((over ? 1f : 0f) - g) * 0.25f;
 			glow.put(m, g);
-			Theme.box(c, x, y, tileW, TILE_H, Theme.lerp(Theme.PANEL, Theme.PANEL2, g), Theme.lerp(Theme.BORDER, Theme.ACCENT, g * 0.8f));
-			if (m.enabled) c.fill(x + 1, y + 1, x + tileW - 1, y + 2, Theme.pulse());
-			Theme.text(c, Theme.fit(m.name, tileW - 10), x + 5, y + 5, Theme.TEXT);
+			Theme.box(c, x, y, tile, tile, Theme.lerp(Theme.PANEL, Theme.PANEL2, g), Theme.lerp(Theme.BORDER, Theme.ACCENT, g * 0.8f));
+			c.fill(x + 1, y + 1, x + tile - 1, y + 2, m.enabled ? Theme.pulse() : Theme.withAlpha(0xFFFFFF, 12));
+			Theme.text(c, Theme.fit(m.name, tile - 10), x + 5, y + 6, Theme.TEXT);
+			int s = Math.min(3, Icons.fit(m.icon, tile - 36));
+			int areaTop = y + 16, areaBot = y + tile - 22;
 			int bob = Math.round(g * 2f + (float) Math.sin(now / 260.0 + x) * g);
-			Icons.drawCentered(c, m.icon, x + tileW / 2, y + 28 - bob, 3);
+			Icons.drawCentered(c, m.icon, x + tile / 2, (areaTop + areaBot) / 2 - bob, s);
 		}
 		if (shown.isEmpty()) Theme.centered(c, "No mods match", px + pw / 2, gy + 30, Theme.DIM);
 		int total = (shown.size() + cols - 1) / cols;

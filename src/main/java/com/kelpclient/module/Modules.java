@@ -343,9 +343,9 @@ public final class Modules {
 			int hx = x + 5;
 			for (int i = 0; i < hearts; i++) {
 				int px = hx + i * 9;
-				Icons.draw(c, "heart", px, y + 14, 1, 0xFF3A2A2A, 99);
-				if (i < full) Icons.draw(c, "heart", px, y + 14, 1, 0xFFE5484D, 99);
-				else if (i == full && half) Icons.draw(c, "heart", px, y + 14, 1, 0xFFE5484D, 5);
+				Icons.draw(c, "heartmini", px, y + 14, 1, 0xFF3A2A2A, 99);
+				if (i < full) Icons.draw(c, "heartmini", px, y + 14, 1, 0xFFE5484D, 99);
+				else if (i == full && half) Icons.draw(c, "heartmini", px, y + 14, 1, 0xFFE5484D, 5);
 			}
 		}
 	}

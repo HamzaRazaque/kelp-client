@@ -12,6 +12,8 @@ public class KButton extends ButtonWidget {
 	public final Mode mode;
 	public String icon, tip;
 	public int iconScale = 1;
+	/** 0..1 scale used for pop-in animations (1 = normal). */
+	public float pop = 1f;
 	public BooleanSupplier on = () -> false;
 	private float hov, onA;
 
@@ -28,6 +30,17 @@ public class KButton extends ButtonWidget {
 
 	@Override
 	public void drawIcon(DrawContext c, int mx, int my, float delta) {
+		if (pop >= 0.999f) { paint(c); return; }
+		if (pop <= 0.01f) return;
+		float cx = getX() + getWidth() / 2f, cy = getY() + getHeight() / 2f;
+		c.getMatrices().pushMatrix();
+		c.getMatrices().translate(cx, cy);
+		c.getMatrices().scale(pop, pop);
+		c.getMatrices().translate(-cx, -cy);
+		try { paint(c); } finally { c.getMatrices().popMatrix(); }
+	}
+
+	private void paint(DrawContext c) {
 		int x = getX(), y = getY(), w = getWidth(), h = getHeight();
 		boolean isHov = isHovered(), isOn = on.getAsBoolean();
 		hov += ((isHov ? 1f : 0f) - hov) * 0.3f;
@@ -41,11 +54,16 @@ public class KButton extends ButtonWidget {
 				if (icon != null) Icons.drawCentered(c, icon, x + w / 2, y + h / 2, iconScale, Theme.lerp(0xFF8FB3A4, Theme.ACCENT, hov));
 				break;
 			case ICON: {
+				boolean lab = !label.isEmpty();
 				Theme.box(c, x, y, w, h, Theme.lerp(Theme.PANEL2, Theme.HOVER, hov), Theme.lerp(Theme.BORDER, Theme.ACCENT, Math.max(hov, onA)));
+				c.fill(x + 1, y + 1, x + w - 1, y + 2, Theme.withAlpha(0xFFFFFF, 14 + (int) (hov * 26)));
 				if (icon != null) {
-					int s = Math.max(1, (int) (Math.min(w, h) * 0.62 / Math.max(Icons.w(icon), Icons.h(icon))));
-					Icons.drawCentered(c, icon, x + w / 2, y + h / 2 - Math.round(hov * 2), s);
+					int box = lab ? h - 20 : h - 6;
+					int s = Icons.fit(icon, box);
+					int cy = lab ? y + 4 + box / 2 : y + h / 2;
+					Icons.drawCentered(c, icon, x + w / 2, cy - Math.round(hov * 2), s);
 				}
+				if (lab) Theme.centered(c, Theme.fit(label, w - 4), x + w / 2, y + h - 12, Theme.lerp(Theme.DIM, Theme.TEXT, hov));
 				break;
 			}
 			case SWITCH: {
@@ -69,10 +87,11 @@ public class KButton extends ButtonWidget {
 				else { fill = Theme.lerp(Theme.PANEL2, Theme.HOVER, hov); border = Theme.lerp(Theme.BORDER, Theme.ACCENT, hov * 0.6f); }
 				Theme.box(c, x, y, w, h, fill, border);
 				int tx = x + w / 2;
-				if (icon != null) {
-					int iw = Icons.w(icon) * iconScale;
-					Icons.drawCentered(c, icon, x + 6 + iw / 2, y + h / 2, iconScale);
-					tx = x + 6 + iw + (w - 6 - iw) / 2;
+				if (icon != null && h >= 18) {
+					int is = Math.max(iconScale, Icons.fit(icon, h - 4));
+					int iw = Icons.w(icon) * is;
+					Icons.drawCentered(c, icon, x + 4 + iw / 2, y + h / 2, is);
+					tx = x + 4 + iw + (w - 4 - iw) / 2;
 				}
 				Theme.centered(c, label, tx, y + (h - 8) / 2, Theme.TEXT);
 			}

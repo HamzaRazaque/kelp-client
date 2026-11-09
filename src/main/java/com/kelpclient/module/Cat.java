@@ -6,7 +6,7 @@ public enum Cat {
 	VISUAL("Visual", "sun", "Client-side visuals: sky, fog, weather, time, FOV and more.\nThese only change what you see, never the server."),
 	CROSSHAIR("Crosshair", "cross", "Replaces the vanilla crosshair.\nUse the gear to change style, size, gap and colour."),
 	WAYPOINTS("Waypoints", "pin", "Add waypoints from the pin icon in the Right Shift menu.\nThey show on screen with their distance."),
-	COSMETICS("Cosmetics", "shirt", "Particle cosmetics: trail, aura, halo and wings.\nThey are client-side, so only you see them."),
+	COSMETICS("Cosmetics", "shirt", "3D cosmetics (wings, sword, cape, hat, pets) and particle effects.\nSwitch them on, then look at yourself in third person (F5).\nThey are client-side, so only you see them."),
 	SOCIAL("Social", "kelp", "Add friends from the person icon in the Right Shift menu.\nFriends online show on your HUD.");
 
 	public final String label, icon, hint;

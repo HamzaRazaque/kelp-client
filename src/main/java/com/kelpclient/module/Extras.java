@@ -58,7 +58,15 @@ public final class Extras {
 		Modules.add(new Cosmetic("trail", "Particle Trail", "Leaves particles behind you as you move", "bolt", 0, 3, true));
 		Modules.add(new Cosmetic("aura", "Aura", "A ring of particles circling your body", "star", 1, 3, false));
 		Modules.add(new Cosmetic("halo", "Halo", "A glowing ring above your head", "sun", 3, 2, false));
-		Modules.add(new Cosmetic("wings", "Wings", "Flapping particle wings on your back", "eye", 3, 2, false));
+
+		// 3D cosmetics (drawn by CosmeticLayer, only on you)
+		String[] cols = com.kelpclient.cosmetic.Colors.NAMES;
+		Modules.add(new Cosmetic3D("wings", "Dragon Wings", "Flapping red dragon wings on your back", "wings")).set(Setting.cycle("color", "Colour", 0, cols));
+		Modules.add(new Cosmetic3D("sword", "Golden Sword", "A glowing sword strapped to your back", "gsword")).set(Setting.cycle("color", "Colour", 0, cols));
+		Modules.add(new Cosmetic3D("cape", "Portrait Cape", "A red cape with a hand-drawn portrait", "cape"));
+		Modules.add(new Cosmetic3D("tophat", "Top Hat", "A classy black top hat", "tophat"));
+		Modules.add(new Cosmetic3D("axolotl", "Axolotl Pet", "A little axolotl riding on your head", "axolotl")).set(Setting.cycle("color", "Colour", 0, cols));
+		Modules.add(new Cosmetic3D("redpanda", "Red Panda", "A red panda trotting beside you", "panda"));
 	}
 
 	private static int argb(int alpha, int rgb) { return (Math.max(0, Math.min(255, alpha)) << 24) | (rgb & 0xFFFFFF); }
@@ -197,6 +205,11 @@ public final class Extras {
 				ParticleTypes.ENCHANT, ParticleTypes.NOTE, ParticleTypes.HAPPY_VILLAGER, ParticleTypes.CRIT, ParticleTypes.CLOUD,
 				ParticleTypes.SNOWFLAKE, ParticleTypes.WITCH, ParticleTypes.ELECTRIC_SPARK};
 		return fx[Math.max(0, Math.min(fx.length - 1, i))];
+	}
+
+	/** Switch for a 3D cosmetic; the drawing itself lives in the cosmetic package. */
+	static class Cosmetic3D extends Module {
+		Cosmetic3D(String id, String name, String desc, String icon) { super(id, name, desc, icon, Cat.COSMETICS, Kind.LOGIC, Anchor.STACK_LEFT); }
 	}
 
 	static class Cosmetic extends Module {

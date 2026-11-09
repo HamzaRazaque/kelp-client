@@ -8,9 +8,8 @@ import org.lwjgl.glfw.GLFW;
 import java.io.File;
 import java.util.List;
 
-/** Full view of one screenshot with previous / next (buttons, arrow keys, scroll wheel) and delete. */
+/** Full view of one screenshot (sharp, real texture) with previous / next (buttons, arrow keys, scroll wheel) and delete. */
 public class ScreenshotViewScreen extends KScreen {
-	private static final int CELLS_W = 160, CELLS_H = 90;
 	private final List<File> files;
 	private int index;
 	private boolean confirm, leftWas, rightWas;
@@ -24,7 +23,7 @@ public class ScreenshotViewScreen extends KScreen {
 
 	@Override
 	protected void layout() {
-		pw = Math.min(width - 12, 640);
+		pw = Math.min(width - 12, 760);
 		ph = height - 12;
 		px = (width - pw) / 2;
 		py = 6;
@@ -35,7 +34,7 @@ public class ScreenshotViewScreen extends KScreen {
 		int y = py + ph - 26;
 		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + 10, y, 52, 18, "< Prev", null, b -> step(-1)));
 		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + 66, y, 52, 18, "Next >", null, b -> step(1)));
-		deleteBtn = new KButton(KButton.Mode.PLAIN, px + 122, y, 62, 18, "Delete", "x", b -> {
+		deleteBtn = new KButton(KButton.Mode.PLAIN, px + 122, y, 70, 18, "Delete", "x", b -> {
 			if (!confirm) { confirm = true; b.setMessage(Text.literal("Sure?")); return; }
 			delete();
 		});
@@ -63,21 +62,33 @@ public class ScreenshotViewScreen extends KScreen {
 	@Override
 	protected void drawContent(DrawContext c, int mx, int my) {
 		if (files.isEmpty()) return;
+		ShotCache.beginFrame();
 		File f = files.get(index);
-		int s = Math.max(1, Math.min((pw - 20) / CELLS_W, (ph - 30 - 40) / CELLS_H));
-		int areaW = pw - 20, areaH = CELLS_H * s;
-		int ax = px + 10, ay = py + 28;
-		Theme.box(c, ax, ay, areaW, areaH + 4, 0xFF050B09, Theme.BORDER);
-		ShotCache.Img img = ShotCache.get(f, CELLS_W, CELLS_H);
-		if (img == null) Theme.centered(c, "Loading...", ax + areaW / 2, ay + areaH / 2, Theme.DIM);
-		else if (img.w == 0) Theme.centered(c, "This image could not be read.", ax + areaW / 2, ay + areaH / 2, Theme.RED);
-		else ShotCache.draw(c, img, ax + (areaW - img.w * s) / 2, ay + 2 + (CELLS_H - img.h) * s / 2, s);
+		int ax = px + 10, ay = py + 28, areaW = pw - 20, areaH = ph - 28 - 56;
+		Theme.box(c, ax, ay, areaW, areaH, 0xFF050B09, Theme.BORDER);
+
+		ShotCache.Tex t = ShotCache.get(f, false);
+		if (t == null) {
+			Theme.centered(c, "Loading...", ax + areaW / 2, ay + areaH / 2 - 4, Theme.DIM);
+		} else if (t.failed) {
+			Theme.centered(c, "This image could not be read.", ax + areaW / 2, ay + areaH / 2 - 4, Theme.RED);
+		} else {
+			double s = Math.min((areaW - 4) / (double) t.w, (areaH - 4) / (double) t.h);
+			int dw = Math.max(1, (int) Math.round(t.w * s)), dh = Math.max(1, (int) Math.round(t.h * s));
+			ShotCache.draw(c, t, ax + (areaW - dw) / 2, ay + (areaH - dh) / 2, dw, dh);
+		}
+		// warm the neighbours so browsing feels instant
+		if (files.size() > 1) {
+			ShotCache.get(files.get(Math.floorMod(index + 1, files.size())), false);
+			ShotCache.get(files.get(Math.floorMod(index - 1, files.size())), false);
+		}
 
 		String info = f.getName() + "   " + (index + 1) + " / " + files.size();
-		if (img != null && img.w > 0) info += "   " + img.srcW + "x" + img.srcH;
+		if (t != null && !t.failed) info += "   " + t.srcW + "x" + t.srcH;
 		info += "   " + (f.length() / 1024) + " KB";
-		Theme.text(c, Theme.fit(info, pw - 20), px + 10, ay + areaH + 10, Theme.DIM);
-		Theme.text(c, "Arrow keys or scroll to browse", px + 10, py + 10 + 0, Theme.DIM);
+		Theme.text(c, Theme.fit(info, pw - 20), px + 10, ay + areaH + 8, Theme.DIM);
+		String hint = "Arrow keys or scroll to browse";
+		Theme.text(c, hint, px + pw - 10 - Theme.tw(hint), py + 10, Theme.DIM);
 	}
 
 	@Override
