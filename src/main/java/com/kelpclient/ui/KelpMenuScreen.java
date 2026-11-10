@@ -39,7 +39,7 @@ public class KelpMenuScreen extends Screen {
 		panelX = (width - panelW) / 2;
 		panelY = (height - panelH) / 2; // dead centre
 		String[] icons = {"grid", "sparkle", "pin", "users", "arrows", "gear"};
-		String[] names = {"Mods", "Cosmetics", "Waypoints", "Social", "Transfer", "Settings"};
+		String[] names = {"Mods", "Wardrobe", "Waypoints", "Social", "Transfer", "Settings"};
 		for (int i = 0; i < COLS * ROWS; i++) {
 			final int idx = i;
 			int cx = panelX + PAD + (i % COLS) * (tile + GAP), cy = panelY + HEAD + (i / COLS) * (tile + GAP);
@@ -54,7 +54,7 @@ public class KelpMenuScreen extends Screen {
 		Screen next;
 		switch (i) {
 			case 0: next = new ModGridScreen(this); break;
-			case 1: next = new ModSettingsScreen(this, Cat.COSMETICS); break;
+			case 1: next = new WardrobeScreen(this); break;
 			case 2: next = new WaypointsScreen(this); break;
 			case 3: next = new SocialScreen(this); break;
 			case 4: next = new TransferScreen(this); break;

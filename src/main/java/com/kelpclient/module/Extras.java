@@ -63,7 +63,6 @@ public final class Extras {
 		String[] cols = com.kelpclient.cosmetic.Colors.NAMES;
 		Modules.add(new Cosmetic3D("wings", "Dragon Wings", "Flapping red dragon wings on your back", "wings")).set(Setting.cycle("color", "Colour", 0, cols));
 		Modules.add(new Cosmetic3D("sword", "Golden Sword", "A glowing sword strapped to your back", "gsword")).set(Setting.cycle("color", "Colour", 0, cols));
-		Modules.add(new Cosmetic3D("cape", "Portrait Cape", "A red cape with a hand-drawn portrait", "cape"));
 		Modules.add(new Cosmetic3D("customcape", "Custom Cape", "Your own picture as a cape: put cape.png in .minecraft/config/kelpclient/", "upload"));
 		Modules.add(new Cosmetic3D("customskin", "Custom Skin", "Your own skin: put a 64x64 skin.png in .minecraft/config/kelpclient/", "person"));
 		Modules.add(new Cosmetic3D("tophat", "Top Hat", "A classy black top hat", "tophat"));

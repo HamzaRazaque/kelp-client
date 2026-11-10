@@ -19,17 +19,20 @@ final class CosmeticModels {
 				.box(-4.6f, -17.2f, -4.6f, 4.6f, -17f, 4.6f, 0xFF30363B));
 	}
 
+	private static int[] axoCols(int v) {
+		return new int[]{Colors.shift(0xFFF4B3CC, v), Colors.shift(0xFFFFDDE9, v), Colors.shift(0xFFE0568A, v), Colors.shift(0xFFC73A74, v), Colors.shift(0xFFF9C6DA, v)};
+	}
+
+	/** Head, body, legs and fin (the still parts of the axolotl). */
 	static VoxelModel axolotl(int v) {
 		return get("axo" + v, () -> {
-			int body = Colors.shift(0xFFF4B3CC, v), belly = Colors.shift(0xFFFFDDE9, v), gill = Colors.shift(0xFFE0568A, v),
-					gillTip = Colors.shift(0xFFC73A74, v), fin = Colors.shift(0xFFF9C6DA, v), dark = 0xFF2A1030;
+			int[] k = axoCols(v);
+			int body = k[0], belly = k[1], fin = k[4], dark = 0xFF2A1030;
 			VoxelModel m = new VoxelModel();
-			// flat, wide head and long body, lying the way a real axolotl does
 			m.box(-3f, -2.2f, -4.6f, 3f, 0f, -0.4f, body);
 			m.box(-2.6f, -2.5f, -4.2f, 2.6f, -2.2f, -0.8f, body);
 			m.box(-2.5f, -2f, -0.5f, 2.5f, 0f, 5.2f, body);
 			m.box(-1.8f, -0.5f, -0.5f, 1.8f, 0f, 5.2f, belly);
-			// wide smiling mouth and little eyes on top of the head
 			m.box(-2.2f, -0.9f, -4.7f, 2.2f, -0.6f, -4.55f, 0xFFD9809F);
 			m.box(-2.4f, -1.1f, -4.7f, -2.2f, -0.8f, -4.55f, 0xFFD9809F);
 			m.box(2.2f, -1.1f, -4.7f, 2.4f, -0.8f, -4.55f, 0xFFD9809F);
@@ -37,26 +40,41 @@ final class CosmeticModels {
 			m.box(1.5f, -2.9f, -3.6f, 2.3f, -2.4f, -2.8f, dark);
 			m.box(-2.0f, -2.95f, -3.5f, -1.7f, -2.85f, -3.2f, 0xFFFFFFFF);
 			m.box(1.7f, -2.95f, -3.5f, 2.0f, -2.85f, -3.2f, 0xFFFFFFFF);
-			// feathery external gills: three stalks per side, each with two filaments
-			for (int i = 0; i < 3; i++) {
-				float y = -2.1f - i * 0.15f, z = -2.4f + i * 0.9f, lift = i * 0.7f;
-				for (int sd = -1; sd <= 1; sd += 2) {
-					float x0 = sd * 3f, x1 = sd * (5f - i * 0.2f);
-					m.box(Math.min(x0, x1), y - lift - 0.5f, z, Math.max(x0, x1), y - lift + 0.1f, z + 0.6f, gill);
-					float f0 = x1, f1 = x1 + sd * 1.3f;
-					m.box(Math.min(f0, f1), y - lift - 1.4f, z, Math.max(f0, f1), y - lift - 0.8f, z + 0.5f, gillTip);
-					m.box(Math.min(f0, f1), y - lift + 0.1f, z, Math.max(f0, f1), y - lift + 0.7f, z + 0.5f, gillTip);
-				}
-			}
-			// tail with a dorsal fin, tiny legs
-			m.box(-0.8f, -1.8f, 5.2f, 0.8f, 0f, 7.4f, body);
-			m.box(-0.5f, -1.3f, 7.4f, 0.5f, 0f, 10f, body);
-			m.box(-0.15f, -3.0f, 0.6f, 0.15f, -2.0f, 7.4f, fin);
-			m.box(-0.15f, -2.2f, 7.4f, 0.15f, -1.2f, 10f, fin);
+			m.box(-0.15f, -3.0f, 0.6f, 0.15f, -2.0f, 5.2f, fin);
 			for (int i = 0; i < 4; i++) {
 				float x = i % 2 == 0 ? -3.4f : 2.4f, z = i < 2 ? -2.2f : 3.2f;
 				m.box(x, -0.2f, z, x + 1f, 0.8f, z + 1.3f, body);
 			}
+			return m;
+		});
+	}
+
+	/** Three feathery gill stalks on one side (sd = -1 or +1); they flutter in the layer. */
+	static VoxelModel axolotlGills(int v, int sd) {
+		return get("axog" + v + sd, () -> {
+			int[] k = axoCols(v);
+			VoxelModel m = new VoxelModel();
+			for (int i = 0; i < 3; i++) {
+				float y = -2.1f - i * 0.15f, z = -2.4f + i * 0.9f, lift = i * 0.7f;
+				float x0 = sd * 3f, x1 = sd * (5f - i * 0.2f);
+				m.box(Math.min(x0, x1), y - lift - 0.5f, z, Math.max(x0, x1), y - lift + 0.1f, z + 0.6f, k[2]);
+				float f0 = x1, f1 = x1 + sd * 1.3f;
+				m.box(Math.min(f0, f1), y - lift - 1.4f, z, Math.max(f0, f1), y - lift - 0.8f, z + 0.5f, k[3]);
+				m.box(Math.min(f0, f1), y - lift + 0.1f, z, Math.max(f0, f1), y - lift + 0.7f, z + 0.5f, k[3]);
+			}
+			return m;
+		});
+	}
+
+	/** Tail (pivot is at z = 5.2). */
+	static VoxelModel axolotlTail(int v) {
+		return get("axot" + v, () -> {
+			int[] k = axoCols(v);
+			VoxelModel m = new VoxelModel();
+			m.box(-0.8f, -1.8f, 5.2f, 0.8f, 0f, 7.4f, k[0]);
+			m.box(-0.5f, -1.3f, 7.4f, 0.5f, 0f, 10f, k[0]);
+			m.box(-0.15f, -3.0f, 5.2f, 0.15f, -1.8f, 7.4f, k[4]);
+			m.box(-0.15f, -2.2f, 7.4f, 0.15f, -1.2f, 10f, k[4]);
 			return m;
 		});
 	}
@@ -88,7 +106,8 @@ final class CosmeticModels {
 		});
 	}
 
-	static VoxelModel pandaLeg() { return get("pleg", () -> new VoxelModel().cube(0, 0, 0, 2f, 3f, 2f, 0xFF2A1812).cube(0, -2.6f, 0, 2.2f, 0.4f, 2.2f, 0xFFC4501C)); }
+	/** Hangs down from the hip (origin = hip joint) so it can swing. */
+	static VoxelModel pandaLeg() { return get("pleg", () -> new VoxelModel().box(-1f, 0f, -1f, 1f, 3f, 1f, 0xFF2A1812).box(-1.1f, 0f, -1.1f, 1.1f, 1f, 1.1f, 0xFFC4501C)); }
 
 	static VoxelModel pandaTail() {
 		return get("ptail", () -> {
@@ -104,7 +123,7 @@ final class CosmeticModels {
 	/** The player's own cape.png, turned into voxels (reloads when the file changes). */
 	static VoxelModel customCape() {
 		CustomAssets.CapeArt a = CustomAssets.cape();
-		if (a == null) return cape();
+		if (a == null) return null;
 		return get("ccape" + a.stamp, () -> new VoxelModel().grid(a.rows, a.pal, 5f, 0f, 0f, 0.5f, 0.6f, -1, 0));
 	}
 
@@ -114,10 +133,6 @@ final class CosmeticModels {
 
 	static VoxelModel wing(int v, boolean right) {
 		return get("wing" + v + right, () -> new VoxelModel().grid(CosmeticArt.WING, CosmeticArt.WING_PAL, 0f, -11f, 0f, 1.1f, 1f, right ? -1 : 1, v));
-	}
-
-	static VoxelModel cape() {
-		return get("cape", () -> new VoxelModel().grid(CosmeticArt.CAPE, CosmeticArt.CAPE_PAL, 5f, 0f, 0f, 0.5f, 0.6f, -1, 0));
 	}
 
 	private CosmeticModels() { }

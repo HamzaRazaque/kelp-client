@@ -16,25 +16,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Mod Menu grid: tiles with icon, gear and Enabled/Disabled, in Kelp colours, with hover animations. */
+/** Mod Menu: sections (one per category) of wide rounded cards, each with a mint line icon and a label. */
 public class ModGridScreen extends KScreen {
-	private Cat filter;
+	private static final int GAP = 6, CARD_H = 46, HEADER_H = 24, DIVIDER_H = 14, TARGET_W = 108;
+
 	private String query = "";
-	private int rowOff, cols, rows, gx, gy, gw, gh, tile;
-	private static final int GAP = 6, TARGET = 86;
-	private int preset = -1;
+	private int lineOff, cols, cardW, gx, gy, gw, gh, preset = -1;
+	private final List<Object> lines = new ArrayList<>(); // String = section header, List<Module> = one row of cards
 	private final List<ClickableWidget> gridW = new ArrayList<>();
 	private final List<Object[]> cells = new ArrayList<>(); // {Module, x, y}
+	private final List<Object[]> heads = new ArrayList<>(); // {String, y, boolean divider}
 	private final Map<Module, Float> glow = new HashMap<>();
-	private List<Module> shown = new ArrayList<>();
+	private int shownCount;
 
-	public ModGridScreen(Screen parent) { super("MOD MENU", parent); }
+	public ModGridScreen(Screen parent) { super("KELP", parent); }
 
 	@Override protected boolean hasDone() { return false; }
 
 	@Override
 	protected void layout() {
-		pw = Math.min(width - 12, 640);
+		pw = Math.min(width - 12, 660);
 		ph = height - 12;
 		px = (width - pw) / 2;
 		py = 6;
@@ -43,117 +44,128 @@ public class ModGridScreen extends KScreen {
 	@Override
 	protected void build() {
 		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26, py + 4, 18, 18, "x", null, b -> close()));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26 - 4 - 62, py + 4, 62, 18, "Shots", "camera", b -> client.setScreen(new ScreenshotsScreen(this))));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 26 - 8 - 62 - 58, py + 4, 58, 18, "Mods", "kelp", b -> client.setScreen(new ModSettingsScreen(this, Cat.HUD))));
-
-		int tx = px + 10, ty = py + 28;
-		List<Object> tabs = new ArrayList<>();
-		tabs.add(null);
-		for (Cat c : Cat.values()) tabs.add(c);
-		for (Object o : tabs) {
-			final Cat cat = (Cat) o;
-			String label = cat == null ? "All" : cat.label;
-			int w = Theme.tw(label) + 10;
-			if (tx + w > px + pw - 10) { tx = px + 10; ty += 20; }
-			addDrawableChild(new KButton(KButton.Mode.TAB, tx, ty, w, 16, label, null, b -> { filter = cat; rowOff = 0; rebuildGrid(); }).on(() -> filter == cat));
-			tx += w + 4;
-		}
-
-		int ry = ty + 20;
-		int sw = Math.min(160, pw - 20 - 110);
-		TextFieldWidget search = new TextFieldWidget(textRenderer, px + 10, ry, sw, 16, Text.literal("Search"));
+		int ry = py + 26;
+		int sw = Math.min(150, pw - 20 - 270);
+		TextFieldWidget search = new TextFieldWidget(textRenderer, px + 10, ry, sw, 18, Text.literal("Search"));
 		search.setPlaceholder(Text.literal("Search"));
 		search.setText(query);
-		search.setChangedListener(s -> { query = s; rowOff = 0; rebuildGrid(); });
+		search.setChangedListener(s -> { query = s; lineOff = 0; rebuildGrid(); });
 		addDrawableChild(search);
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 10 - 100, ry, 44, 16, "Presets", null, b -> {
+		int bx = px + pw - 10;
+		bx -= 52; addDrawableChild(new KButton(KButton.Mode.PLAIN, bx, ry, 52, 18, "Reset", null, b -> { Modules.resetAll(); rebuildGrid(); }));
+		bx -= 4 + 62; addDrawableChild(new KButton(KButton.Mode.PLAIN, bx, ry, 62, 18, "Presets", null, b -> {
 			preset = (preset + 1) % Modules.PRESET_NAMES.length;
 			Modules.applyPreset(preset);
 			b.setMessage(Text.literal(Modules.PRESET_NAMES[preset]));
 			rebuildGrid();
 		}));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, px + pw - 10 - 52, ry, 52, 16, "Reset", null, b -> {
-			Modules.resetAll();
-			rebuildGrid();
-		}));
+		bx -= 4 + 74; addDrawableChild(new KButton(KButton.Mode.PLAIN, bx, ry, 74, 18, "Wardrobe", "sparkle", b -> client.setScreen(new WardrobeScreen(this))));
+		bx -= 4 + 62; addDrawableChild(new KButton(KButton.Mode.PLAIN, bx, ry, 62, 18, "Shots", "camera", b -> client.setScreen(new ScreenshotsScreen(this))));
 
 		gx = px + 10;
-		gy = ry + 24;
-		gw = pw - 20 - 8;
-		gh = py + ph - 10 - gy;
-		// square tiles: pick the column count first, then the tile size follows from the width
-		cols = Math.max(3, (gw + GAP) / (TARGET + GAP));
-		tile = Math.min(108, (gw - (cols - 1) * GAP) / cols);
-		gx = px + 10 + (gw - (cols * tile + (cols - 1) * GAP)) / 2;
-		rows = Math.max(1, (gh + GAP) / (tile + GAP));
+		gy = ry + 26;
+		gw = pw - 20 - 6;
+		gh = py + ph - 8 - gy;
+		cols = Math.max(2, (gw + GAP) / (TARGET_W + GAP));
+		cardW = (gw - (cols - 1) * GAP) / cols;
+		gx = px + 10 + (gw - (cols * cardW + (cols - 1) * GAP)) / 2;
+		buildLines();
 		rebuildGrid();
 	}
 
-	private List<Module> filtered() {
-		List<Module> out = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private void buildLines() {
+		lines.clear();
 		String q = query.toLowerCase(Locale.ROOT).trim();
-		for (Module m : Modules.ALL) {
-			if (filter != null && m.cat != filter) continue;
-			if (!q.isEmpty() && !m.name.toLowerCase(Locale.ROOT).contains(q) && !m.desc.toLowerCase(Locale.ROOT).contains(q)) continue;
-			out.add(m);
+		shownCount = 0;
+		for (Cat cat : Cat.values()) {
+			List<Module> mods = new ArrayList<>();
+			for (Module m : Modules.ALL) {
+				if (m.cat != cat) continue;
+				if (!q.isEmpty() && !m.name.toLowerCase(Locale.ROOT).contains(q) && !m.desc.toLowerCase(Locale.ROOT).contains(q)) continue;
+				mods.add(m);
+			}
+			if (mods.isEmpty()) continue;
+			shownCount += mods.size();
+			lines.add(cat.label);
+			for (int i = 0; i < mods.size(); i += cols) lines.add(new ArrayList<>(mods.subList(i, Math.min(mods.size(), i + cols))));
 		}
-		return out;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void rebuildGrid() {
 		for (ClickableWidget w : gridW) remove(w);
 		gridW.clear();
 		cells.clear();
-		shown = filtered();
-		int total = (shown.size() + cols - 1) / cols;
-		rowOff = Math.max(0, Math.min(rowOff, Math.max(0, total - rows)));
-		for (int r = 0; r < rows; r++) {
-			for (int c = 0; c < cols; c++) {
-				int idx = (rowOff + r) * cols + c;
-				if (idx >= shown.size()) break;
-				final Module m = shown.get(idx);
-				int x = gx + c * (tile + GAP), y = gy + r * (tile + GAP);
-				cells.add(new Object[]{m, x, y});
-				if (true) { // every module has options now (keybind)
-					KButton gear = new KButton(KButton.Mode.GHOST, x + 4, y + tile - 20, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
+		heads.clear();
+		buildLines();
+		lineOff = Math.max(0, Math.min(lineOff, Math.max(0, lines.size() - 1)));
+		int y = gy;
+		boolean first = true;
+		for (int i = lineOff; i < lines.size(); i++) {
+			Object ln = lines.get(i);
+			if (ln instanceof String) {
+				boolean div = !first && i > lineOff;
+				int h = HEADER_H + (div ? DIVIDER_H : 0);
+				if (y + h > gy + gh) break;
+				heads.add(new Object[]{ln, y + (div ? DIVIDER_H : 0), div, y});
+				y += h;
+			} else {
+				if (y + CARD_H > gy + gh) break;
+				List<Module> row = (List<Module>) ln;
+				for (int c = 0; c < row.size(); c++) {
+					final Module m = row.get(c);
+					int x = gx + c * (cardW + GAP);
+					cells.add(new Object[]{m, x, y});
+					KButton hit = new KButton(KButton.Mode.HIT, x, y, cardW, CARD_H, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); });
+					gridW.add(hit); addDrawableChild(hit);
+					KButton gear = new KButton(KButton.Mode.GHOST, x + cardW - 17, y + 1, 16, 16, "", "gear", b -> client.setScreen(new ModOptionsScreen(this, m)));
 					gridW.add(gear); addDrawableChild(gear);
 				}
-				KButton st = new KButton(KButton.Mode.STATE, x + 22, y + tile - 19, tile - 26, 14, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); }).on(() -> m.enabled);
-				gridW.add(st); addDrawableChild(st);
-				KButton hit = new KButton(KButton.Mode.HIT, x, y, tile, tile - 22, "", null, b -> { m.setEnabled(!m.enabled); Config.save(); });
-				gridW.add(hit); addDrawableChild(hit);
+				y += CARD_H + GAP;
 			}
+			first = false;
 		}
 	}
 
 	@Override
 	protected void drawContent(DrawContext c, int mx, int my) {
+		// header pill, like the theme card
+		String pill = "Abyssal Mint";
+		int pw2 = Theme.tw(pill) + 14, pxx = px + pw - 30 - pw2;
+		Theme.box(c, pxx, py + 5, pw2, 14, 0xFF0F3A2B, 0xFF17603F);
+		Theme.text(c, pill, pxx + 7, py + 9, Theme.ACCENT);
+
+		for (Object[] h : heads) {
+			int y = (Integer) h[1];
+			if ((Boolean) h[2]) c.fill(gx, y - 8, gx + gw, y - 7, Theme.BORDER);
+			Theme.text(c, (String) h[0], gx + 2, y + 6, Theme.TEXT);
+		}
 		long now = System.currentTimeMillis();
 		for (Object[] cell : cells) {
 			Module m = (Module) cell[0];
 			int x = (Integer) cell[1], y = (Integer) cell[2];
-			boolean over = mx >= x && mx < x + tile && my >= y && my < y + tile;
+			boolean over = mx >= x && mx < x + cardW && my >= y && my < y + CARD_H;
 			float g = glow.getOrDefault(m, 0f);
 			g += ((over ? 1f : 0f) - g) * 0.25f;
 			glow.put(m, g);
-			Theme.box(c, x, y, tile, tile, Theme.lerp(Theme.PANEL, Theme.PANEL2, g), Theme.lerp(Theme.BORDER, Theme.ACCENT, g * 0.8f));
-			c.fill(x + 1, y + 1, x + tile - 1, y + 2, m.enabled ? Theme.pulse() : Theme.withAlpha(0xFFFFFF, 12));
-			Theme.text(c, Theme.fit(m.name, tile - 10), x + 5, y + 6, Theme.TEXT);
-			int s = Math.min(3, Icons.fit(m.icon, tile - 36));
-			int areaTop = y + 16, areaBot = y + tile - 22;
-			int bob = Math.round(g * 2f + (float) Math.sin(now / 260.0 + x) * g);
-			Icons.drawCentered(c, m.icon, x + tile / 2, (areaTop + areaBot) / 2 - bob, s);
+			int border = m.enabled ? Theme.lerp(0xFF2B9B73, Theme.ACCENT, g) : Theme.lerp(0xFF14382F, Theme.BORDER, g);
+			Theme.box(c, x, y, cardW, CARD_H, Theme.lerp(Theme.PANEL2, Theme.HOVER, g), border);
+			int bob = Math.round(g * 2f + (float) Math.sin(now / 260.0 + x) * g * 0.6f);
+			Icons.drawCentered(c, m.icon, x + cardW / 2, y + 17 - bob, 1);
+			Theme.centered(c, Theme.fit(m.name, cardW - 8), x + cardW / 2, y + CARD_H - 13, m.enabled ? Theme.TEXT : Theme.DIM);
+			if (m.enabled) c.fill(x + 5, y + 5, x + 8, y + 8, Theme.ACCENT);
 		}
-		if (shown.isEmpty()) Theme.centered(c, "No mods match", px + pw / 2, gy + 30, Theme.DIM);
-		int total = (shown.size() + cols - 1) / cols;
-		if (total > rows) {
-			int bx = px + pw - 12, barH = gh, th = Math.max(16, barH * rows / total);
-			int ty = gy + (barH - th) * rowOff / Math.max(1, total - rows);
-			c.fill(bx, gy, bx + 3, gy + barH, 0xFF10201C);
+		if (shownCount == 0) Theme.centered(c, "No mods match", px + pw / 2, gy + 30, Theme.DIM);
+		if (lines.size() > 1 && (lineOff > 0 || cells.size() < shownCount)) {
+			int bx = px + pw - 9, th = Math.max(16, gh * Math.max(1, cells.size() + heads.size()) / Math.max(1, shownCount + heads.size()));
+			th = Math.min(th, gh);
+			int ty = gy + (gh - th) * lineOff / Math.max(1, lines.size() - 1);
+			c.fill(bx, gy, bx + 3, gy + gh, 0xFF10201C);
 			c.fill(bx, ty, bx + 3, ty + th, Theme.ACCENT);
 		}
 	}
 
 	@Override
-	protected boolean onScroll(int dir) { rowOff += dir; rebuildGrid(); return true; }
+	protected boolean onScroll(int dir) { lineOff += dir; rebuildGrid(); return true; }
 }

@@ -35,6 +35,13 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 		return RenderLayers.entityCutoutNoCull(white);
 	}
 
+	/** Rotates around a point given in model pixels. */
+	private static void pivot(MatrixStack m, float px, float py, float pz, Quaternionf rot) {
+		m.translate(px / 16f, py / 16f, pz / 16f);
+		m.multiply(rot);
+		m.translate(-px / 16f, -py / 16f, -pz / 16f);
+	}
+
 	private static boolean on(String id) { Module m = Modules.BY_ID.get(id); return m != null && m.enabled; }
 	private static int opt(String id) { Module m = Modules.BY_ID.get(id); return m == null ? 0 : m.get("color"); }
 
@@ -58,10 +65,21 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 			m.pop();
 		}
 		if (on("axolotl")) {
+			int v = opt("axolotl");
 			m.push();
 			model.head.applyTransform(m);
 			m.translate(0f, ((hat ? -17.2f : -8.7f) + (float) Math.sin(age * 0.12f) * 0.2f) / 16f, -0.2f / 16f);
-			draw(m, q, CosmeticModels.axolotl(opt("axolotl")), light);
+			draw(m, q, CosmeticModels.axolotl(v), light);
+			for (int sd = -1; sd <= 1; sd += 2) {
+				m.push();
+				pivot(m, sd * 3f, -1.4f, -1.8f, new Quaternionf().rotateZ(sd * (float) Math.sin(age * 0.4f + sd) * 0.2f).rotateY(sd * (float) Math.cos(age * 0.33f) * 0.18f));
+				draw(m, q, CosmeticModels.axolotlGills(v, sd), light);
+				m.pop();
+			}
+			m.push();
+			pivot(m, 0f, -0.9f, 5.2f, new Quaternionf().rotateY((float) Math.sin(age * 0.22f) * 0.5f).rotateX((float) Math.sin(age * 0.11f) * 0.08f));
+			draw(m, q, CosmeticModels.axolotlTail(v), light);
+			m.pop();
 			m.pop();
 		}
 		if (on("redpanda")) {
@@ -73,9 +91,10 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 			draw(m, q, CosmeticModels.pandaBody(), light);
 			for (int i = 0; i < 4; i++) {
 				float lx = (i % 2 == 0 ? -1.8f : 1.8f), lz = (i < 2 ? -3.2f : 2.6f);
-				float swing = (float) Math.sin(limbAngle * 0.6662f + (i % 2 == 0 ? 0 : Math.PI)) * Math.min(1f, limbDistance) * 1.8f;
+				float swing = (float) Math.sin(limbAngle * 0.6662f + ((i == 0 || i == 3) ? 0 : Math.PI)) * Math.min(1f, limbDistance) * 0.9f;
 				m.push();
-				m.translate(lx / 16f, 0f, (lz + swing) / 16f);
+				m.translate(lx / 16f, -3f / 16f, lz / 16f);
+				m.multiply(new Quaternionf().rotateX(swing));
 				draw(m, q, CosmeticModels.pandaLeg(), light);
 				m.pop();
 			}
@@ -86,21 +105,13 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 			m.pop();
 			m.pop();
 		}
-		if (on("cape")) {
-			m.push();
-			model.body.applyTransform(m);
-			m.translate(0f, 0.4f / 16f, 3.4f / 16f);
-			float b = 0.06f + Math.min(1f, limbDistance) * 0.45f + (sneak ? 0.22f : 0f);
-			m.multiply(new Quaternionf().rotateX(b));
-			draw(m, q, CosmeticModels.cape(), light);
-			m.pop();
-		}
 		if (on("customcape")) {
 			m.push();
 			model.body.applyTransform(m);
 			m.translate(0f, 0.4f / 16f, 3.4f / 16f);
 			m.multiply(new Quaternionf().rotateX(0.06f + Math.min(1f, limbDistance) * 0.45f + (sneak ? 0.22f : 0f)));
-			draw(m, q, CosmeticModels.customCape(), light);
+			VoxelModel cape = CosmeticModels.customCape();
+			if (cape != null) draw(m, q, cape, light);
 			m.pop();
 		}
 		if (on("sword")) {

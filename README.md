@@ -20,10 +20,16 @@ Social: Friends Online, Chat Timestamps
 
 ## Build
 Check `gradle.properties` against https://fabricmc.net/develop (Minecraft 1.21.11).
-`./gradlew build` -> `build/libs/kelpclient-1.3.0.jar`
+`./gradlew build` -> `build/libs/kelpclient-1.4.0.jar`
 
 ## New in 1.3.0
 - Kelp theme colours (#071411 / #0D211C / #122B24 / #1D5545, accents #39E6A2 and #42C7D5) and mint line icons.
 - Main menu background: a slowly drifting underwater kelp forest with bubbles. Replay Mod / Flashback get icon tiles (top-left) when installed.
 - Every module has a Keybind (default None) and HUD modules have a Size setting, both in the gear screen.
 - Custom Cape (`.minecraft/config/kelpclient/cape.png`, any picture) and Custom Skin (`skin.png`, 64x64) cosmetics; new axolotl and red panda models.
+
+## New in 1.4.0
+- Mod menu redone: sections per category with wide rounded cards (click to toggle, gear for options).
+- **Kelp Wardrobe** (menu tile or "Wardrobe" in the mod menu): cosmetics with previews on the left, your player on the right (drag to rotate, scroll to zoom). Drop a PNG on the window to set your skin (64x64 or old 64x32) or cape; "Remove" buttons undo it.
+- Axolotl animates (gills flutter, tail wags); red panda legs swing from the hip; the old portrait cape is gone (use Custom Cape).
+- Flashback tile opens Flashback's replay screen directly.

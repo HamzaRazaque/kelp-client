@@ -66,9 +66,10 @@ public class KelpClient implements ClientModInitializer {
 				Screens.getButtons(screen).add(mods);
 				if (screen instanceof TitleScreen) {
 					int ty = 62;
-					for (String[] r : new String[][]{{"replaymod", "replay", "Replay Mod"}, {"flashback", "flashback", "Flashback"}}) {
+					for (String[] r : new String[][]{{"replaymod", "replay", "Replay Mod", null},
+							{"flashback", "flashback", "Flashback", "com.moulberry.flashback.screen.select_replay.SelectReplayScreen"}}) {
 						if (!ModIcons.loaded(r[0])) continue;
-						addModTile(screen, ty, r[0], r[1], r[2]);
+						addModTile(screen, ty, r[0], r[1], r[2], r[3]);
 						ty += 28;
 					}
 				}
@@ -77,20 +78,32 @@ public class KelpClient implements ClientModInitializer {
 	}
 
 	/** A tile with another mod's own icon that presses that mod's main-menu button for you. */
-	private static void addModTile(net.minecraft.client.gui.screen.Screen screen, int y, String modId, String keyword, String name) {
+	private static void addModTile(net.minecraft.client.gui.screen.Screen screen, int y, String modId, String keyword, String name, String screenClass) {
 		ModIcons.Icon icon = ModIcons.get(modId);
-		KButton b = new KButton(KButton.Mode.ICON, 6, y, 24, 24, "", icon == null ? "folder" : null, btn -> {
-			for (net.minecraft.client.gui.widget.ClickableWidget w : Screens.getButtons(screen)) {
-				if (w instanceof net.minecraft.client.gui.widget.ButtonWidget bw && !(w instanceof KButton)
-						&& w.getMessage().getString().toLowerCase().contains(keyword)) {
-					((ButtonWidgetAccessor) (Object) bw).kelp$onPress().onPress(bw);
-					return;
-				}
-			}
-		});
+		KButton b = new KButton(KButton.Mode.ICON, 6, y, 24, 24, "", icon == null ? "folder" : null, btn -> openModScreen(screen, keyword, screenClass));
 		if (icon != null) b.texture(icon.id, icon.w, icon.h);
 		b.setTooltip(Tooltip.of(Text.literal(name)));
 		Screens.getButtons(screen).add(b);
+	}
+
+	/** Opens the other mod's screen directly when we know its class, otherwise presses its main-menu button. */
+	private static void openModScreen(net.minecraft.client.gui.screen.Screen screen, String keyword, String screenClass) {
+		MinecraftClient mc = MinecraftClient.getInstance();
+		if (screenClass != null) {
+			try {
+				Object s = Class.forName(screenClass).getConstructor(net.minecraft.client.gui.screen.Screen.class).newInstance(screen);
+				mc.setScreen((net.minecraft.client.gui.screen.Screen) s);
+				return;
+			} catch (Throwable ignored) { }
+		}
+		for (net.minecraft.client.gui.widget.ClickableWidget w : Screens.getButtons(screen)) {
+			if (w instanceof KButton) continue;
+			boolean match = w.getMessage().getString().toLowerCase().contains(keyword) || w.getClass().getName().toLowerCase().contains(keyword);
+			if (match && w instanceof net.minecraft.client.gui.widget.ButtonWidget bw) {
+				((ButtonWidgetAccessor) (Object) bw).kelp$onPress().onPress(bw);
+				return;
+			}
+		}
 	}
 
 	/** Double-tap Right Shift (in a world, with no screen open) to open the Kelp menu. */
