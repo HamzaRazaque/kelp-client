@@ -56,28 +56,33 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 		PlayerEntityModel model = getContextModel();
 		float age = s.age;
 		boolean sneak = s.isInSneakingPose;
-		boolean hat = on("tophat");
-
-		if (hat) {
+		// only one hat at a time; the first worn one in this order wins
+		VoxelModel hatModel = null;
+		float headTop = -8.7f;
+		if (on("tophat")) { hatModel = CosmeticModels.hat(); headTop = -17.4f; }
+		else if (on("wizardhat")) { hatModel = CosmeticModels.wizardHat(); headTop = -21.4f; }
+		else if (on("crown")) { hatModel = CosmeticModels.crown(); headTop = -12.8f; }
+		else if (on("catears")) { hatModel = CosmeticModels.catEars(); headTop = -12.6f; }
+		if (hatModel != null) {
 			m.push();
 			model.head.applyTransform(m);
-			draw(m, q, CosmeticModels.hat(), light);
+			draw(m, q, hatModel, light);
 			m.pop();
 		}
 		if (on("axolotl")) {
 			int v = opt("axolotl");
 			m.push();
 			model.head.applyTransform(m);
-			m.translate(0f, ((hat ? -17.2f : -8.7f) + (float) Math.sin(age * 0.12f) * 0.2f) / 16f, -0.2f / 16f);
+			m.translate(0f, (headTop + (float) Math.sin(age * 0.12f) * 0.2f) / 16f, -0.2f / 16f);
 			draw(m, q, CosmeticModels.axolotl(v), light);
 			for (int sd = -1; sd <= 1; sd += 2) {
 				m.push();
-				pivot(m, sd * 3f, -1.4f, -1.8f, new Quaternionf().rotateZ(sd * (float) Math.sin(age * 0.4f + sd) * 0.2f).rotateY(sd * (float) Math.cos(age * 0.33f) * 0.18f));
+				pivot(m, sd * 3.3f, -1.6f, -1.8f, new Quaternionf().rotateZ(sd * (float) Math.sin(age * 0.4f + sd) * 0.2f).rotateY(sd * (float) Math.cos(age * 0.33f) * 0.18f));
 				draw(m, q, CosmeticModels.axolotlGills(v, sd), light);
 				m.pop();
 			}
 			m.push();
-			pivot(m, 0f, -0.9f, 5.2f, new Quaternionf().rotateY((float) Math.sin(age * 0.22f) * 0.5f).rotateX((float) Math.sin(age * 0.11f) * 0.08f));
+			pivot(m, 0f, -1.2f, 5.4f, new Quaternionf().rotateY((float) Math.sin(age * 0.22f) * 0.5f).rotateX((float) Math.sin(age * 0.11f) * 0.08f));
 			draw(m, q, CosmeticModels.axolotlTail(v), light);
 			m.pop();
 			m.pop();
@@ -120,17 +125,20 @@ public final class CosmeticLayer extends FeatureRenderer<PlayerEntityRenderState
 			draw(m, q, CosmeticModels.sword(opt("sword")), light);
 			m.pop();
 		}
-		if (on("wings")) {
-			int v = opt("wings");
+		String[] wingIds = {"wings", "wings_angel", "wings_butterfly", "wings_raven", "wings_crystal"};
+		for (int style = 0; style < wingIds.length; style++) {
+			if (!on(wingIds[style])) continue;
+			int v = opt(wingIds[style]);
 			float a = 0.5f + (float) Math.sin(age * 0.12f) * 0.08f + Math.min(1f, limbDistance) * (float) Math.sin(age * 0.5f) * 0.15f + (sneak ? 0.15f : 0f);
 			for (int side = -1; side <= 1; side += 2) {
 				m.push();
 				model.body.applyTransform(m);
 				m.translate(side * 1.5f / 16f, 1.5f / 16f, 3.6f / 16f);
 				m.multiply(new Quaternionf().rotateY(-side * a).rotateZ(-side * 0.25f));
-				draw(m, q, CosmeticModels.wing(v, side < 0), light);
+				draw(m, q, CosmeticModels.wing(style, v, side < 0), light);
 				m.pop();
 			}
+			break; // one pair of wings at a time
 		}
 	}
 }

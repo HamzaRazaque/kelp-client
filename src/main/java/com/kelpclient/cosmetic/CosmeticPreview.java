@@ -9,6 +9,7 @@ import java.util.Map;
 /** Small 2D previews of cosmetics for the Wardrobe cards (drawn from the same pixel art as the 3D models). */
 public final class CosmeticPreview {
 	public static void draw(DrawContext c, Module m, int x, int y, int w, int h) {
+		if (ModelPreview.draw(c, m, x, y, w, h)) return;
 		int hue = 0;
 		for (com.kelpclient.module.Setting s : m.settings) if (s.key.equals("color")) hue = s.v;
 		switch (m.id) {

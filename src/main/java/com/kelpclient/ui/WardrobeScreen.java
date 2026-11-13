@@ -78,8 +78,8 @@ public class WardrobeScreen extends KScreen {
 		vh = ph - 34 - 96;
 
 		int by = vy + vh + 8, half = (vw - 4) / 2;
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, vx, by, half, 18, "Set Skin", "person", b -> arm("skin")));
-		addDrawableChild(new KButton(KButton.Mode.PLAIN, vx + half + 4, by, half, 18, "Set Cape", "upload", b -> arm("cape")));
+		addDrawableChild(new KButton(KButton.Mode.PLAIN, vx, by, half, 18, "Upload Skin", "person", b -> pick("skin")));
+		addDrawableChild(new KButton(KButton.Mode.PLAIN, vx + half + 4, by, half, 18, "Upload Cape", "upload", b -> pick("cape")));
 		addDrawableChild(new KButton(KButton.Mode.PLAIN, vx, by + 22, half, 18, "Remove Skin", null, b -> {
 			SkinImport.remove("skin"); say("Skin removed - you have your normal skin again.", Theme.ACCENT);
 		}));
@@ -95,6 +95,16 @@ public class WardrobeScreen extends KScreen {
 		});
 		addDrawableChild(spinBtn);
 		rebuildCards();
+	}
+
+	/** Opens the in-game file browser and installs the chosen PNG. */
+	private void pick(String kind) {
+		client.setScreen(new FilePickerScreen(this, kind.equals("skin") ? "CHOOSE A SKIN (64x64 PNG)" : "CHOOSE A CAPE PICTURE (PNG)", path -> {
+			String err = kind.equals("skin") ? SkinImport.importSkin(path) : SkinImport.importCape(path);
+			if (err != null) say(err, Theme.RED);
+			else say((kind.equals("skin") ? "Skin" : "Cape") + " applied! Remove it any time with the buttons below.", Theme.ACCENT);
+			rebuildCards();
+		}));
 	}
 
 	private void arm(String kind) {
@@ -207,7 +217,7 @@ public class WardrobeScreen extends KScreen {
 		if (!status.isEmpty() && System.currentTimeMillis() - statusMs < 9000) {
 			Theme.text(c, Theme.fit(status, vw), vx, by + 2, statusColor);
 		} else {
-			Theme.text(c, Theme.fit("Tip: drop a PNG onto this window to set your skin or cape.", vw), vx, by + 2, Theme.DIM);
+			Theme.text(c, Theme.fit("Tip: Upload Skin / Upload Cape opens a file browser (or drop a PNG here).", vw), vx, by + 2, Theme.DIM);
 		}
 	}
 

@@ -20,7 +20,7 @@ Social: Friends Online, Chat Timestamps
 
 ## Build
 Check `gradle.properties` against https://fabricmc.net/develop (Minecraft 1.21.11).
-`./gradlew build` -> `build/libs/kelpclient-1.4.0.jar`
+`./gradlew build` -> `build/libs/kelpclient-1.5.0.jar`
 
 ## New in 1.3.0
 - Kelp theme colours (#071411 / #0D211C / #122B24 / #1D5545, accents #39E6A2 and #42C7D5) and mint line icons.
@@ -33,3 +33,9 @@ Check `gradle.properties` against https://fabricmc.net/develop (Minecraft 1.21.1
 - **Kelp Wardrobe** (menu tile or "Wardrobe" in the mod menu): cosmetics with previews on the left, your player on the right (drag to rotate, scroll to zoom). Drop a PNG on the window to set your skin (64x64 or old 64x32) or cape; "Remove" buttons undo it.
 - Axolotl animates (gills flutter, tail wags); red panda legs swing from the hip; the old portrait cape is gone (use Custom Cape).
 - Flashback tile opens Flashback's replay screen directly.
+
+## New in 1.5.0
+- Wardrobe: **Upload Skin / Upload Cape** open an in-game file browser (with a picture preview). Dropping a PNG still works too.
+- Real 3D previews of every cosmetic on the Wardrobe cards.
+- Axolotl rebuilt like the Minecraft one (pink block head, side eyes, big red-pink gills that flutter, wagging tail).
+- New wings: Angel, Butterfly, Raven, Crystal (one pair at a time). New hats: Golden Crown, Wizard Hat, Cat Ears.

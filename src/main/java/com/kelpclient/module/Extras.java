@@ -65,6 +65,13 @@ public final class Extras {
 		Modules.add(new Cosmetic3D("sword", "Golden Sword", "A glowing sword strapped to your back", "gsword")).set(Setting.cycle("color", "Colour", 0, cols));
 		Modules.add(new Cosmetic3D("customcape", "Custom Cape", "Your own picture as a cape: put cape.png in .minecraft/config/kelpclient/", "upload"));
 		Modules.add(new Cosmetic3D("customskin", "Custom Skin", "Your own skin: put a 64x64 skin.png in .minecraft/config/kelpclient/", "person"));
+		Modules.add(new Cosmetic3D("wings_angel", "Angel Wings", "Soft white feathered wings", "wings"));
+		Modules.add(new Cosmetic3D("wings_butterfly", "Butterfly Wings", "Bright butterfly wings", "wings")).set(Setting.cycle("color", "Colour", 0, cols));
+		Modules.add(new Cosmetic3D("wings_raven", "Raven Wings", "Dark feathered wings", "wings"));
+		Modules.add(new Cosmetic3D("wings_crystal", "Crystal Wings", "Glittering crystal shards", "wings")).set(Setting.cycle("color", "Colour", 0, cols));
+		Modules.add(new Cosmetic3D("crown", "Golden Crown", "A royal crown with gems", "crown"));
+		Modules.add(new Cosmetic3D("wizardhat", "Wizard Hat", "A tall purple wizard hat", "sparkle"));
+		Modules.add(new Cosmetic3D("catears", "Cat Ears", "Little black cat ears", "paw"));
 		Modules.add(new Cosmetic3D("tophat", "Top Hat", "A classy black top hat", "tophat"));
 		Modules.add(new Cosmetic3D("axolotl", "Axolotl Pet", "A little axolotl riding on your head", "axolotl")).set(Setting.cycle("color", "Colour", 0, cols));
 		Modules.add(new Cosmetic3D("redpanda", "Red Panda", "A red panda trotting beside you", "panda"));

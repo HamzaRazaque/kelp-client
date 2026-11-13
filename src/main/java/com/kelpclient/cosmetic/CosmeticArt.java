@@ -5,7 +5,7 @@ import java.util.Map;
 
 /** Pixel art for the 3D cosmetics (generated). '.' is empty. */
 final class CosmeticArt {
-	static final Map<Character, Integer> SWORD_PAL = new HashMap<>(), WING_PAL = new HashMap<>(), CAPE_PAL = new HashMap<>();
+	static final Map<Character, Integer> SWORD_PAL = new HashMap<>(), GILL_PAL = new HashMap<>();
 	static final String[] SWORD = {
 		"..............jg",
 		".............igg",
@@ -24,7 +24,19 @@ final class CosmeticArt {
 		"eeefc...........",
 		"eeec............"
 	};
-	static final String[] WING = {
+	static final String[] GILL = {
+		".....aaab",
+		"...aacaab",
+		"..aaaa...",
+		"aaaaaaaaa",
+		"bbaaacaab",
+		"bbaaa...b",
+		"bbaacaa..",
+		"...aaaaa.",
+		".....abb."
+	};
+	static final Map<Character, Integer> DRAGON_PAL = new HashMap<>();
+	static final String[] DRAGON = {
 		"................pppp",
 		".........ppppppppppp",
 		".....ppppqppppppppm.",
@@ -41,44 +53,89 @@ final class CosmeticArt {
 		".m......oq..........",
 		"........o..........."
 	};
-	static final String[] CAPE = {
-		"11111111111111111111",
-		"12222222222222222221",
-		"12333333333333333321",
-		"12344444444444444321",
-		"12354545454545454321",
-		"12344444464464444321",
-		"12544464666644444521",
-		"12344466777666444321",
-		"12344777777766644321",
-		"12546667777666664521",
-		"12366666666666664321",
-		"12366899999999886321",
-		"12566999999999986521",
-		"12348kkk9999kkk84321",
-		"1234699kk99kk9964321",
-		"12546kkkk99kkkk64521",
-		"123889wkw99wkw988321",
-		"12388999999999988321",
-		"1254899999u999984521",
-		"123448999u9999844321",
-		"12344489kkkkk8444321",
-		"12544448999984444521",
-		"12344444888884444321",
-		"12344rrr88888r444321",
-		"1254rrrruuuuurr44521",
-		"123rrrrrrrtrrrrr4321",
-		"123rsrrrrrtrrrssr321",
-		"123rssrrrrtrrssrr321",
-		"123rrsrrrrtrrsrrr321",
-		"12rrrssrrrtrssrrrr21",
-		"12rrrrsrrrtrsrrrrr21",
-		"11rrrrrsrrtrsrrrrr11"
+	static final Map<Character, Integer> ANGEL_PAL = new HashMap<>();
+	static final String[] ANGEL = {
+		"....................",
+		"....................",
+		"..............aacccd",
+		".........accccccaaa.",
+		"..cccccccccaaaaaaa..",
+		"accccaaaaaaaabcccd..",
+		".ccc....bccccccbb...",
+		".cc.ccccccbbbbbb....",
+		"ccccbbbbbbacccd.....",
+		"ccc....cccccaa......",
+		"cc.cccccaaaaa.......",
+		"ccccaaaaccda........",
+		"c....ccccb..........",
+		"c.ccccbbb...........",
+		"bccbbbbb............"
 	};
+	static final Map<Character, Integer> BUTTERFLY_PAL = new HashMap<>();
+	static final String[] BUTTERFLY = {
+		"......oooooooooo....",
+		"....oooaaaaaaaaooo..",
+		"...ooaaaaaabbbbaaoo.",
+		"..oaaaaaabbbbbbwbaao",
+		"..oaaaaabbbbbbbbbbao",
+		"..oaooaaabbbbbbbbwao",
+		"..ooooaaaabbbbbbaaao",
+		"..oooaaoooooaaaaaao.",
+		".oooooorrrrrowaaoo..",
+		"ooooorrrrrrrrrooo...",
+		"oooorrrrwrrrrrro....",
+		"oo.orrrrrrrwrrro....",
+		"o...orrrrrrrrro.....",
+		".....oorrrrroo......",
+		".......ooooo........"
+	};
+	static final Map<Character, Integer> RAVEN_PAL = new HashMap<>();
+	static final String[] RAVEN = {
+		"....................",
+		"....................",
+		"..............aacccd",
+		".........accccccaaa.",
+		"..cccccccccaaaaaaa..",
+		"accccaaaaaaaabcccd..",
+		".ccc....bccccccbb...",
+		".cc.ccccccbbbbbb....",
+		"ccccbbbbbbacccd.....",
+		"ccc....cccccaa......",
+		"cc.cccccaaaaa.......",
+		"ccccaaaaccda........",
+		"c....ccccb..........",
+		"c.ccccbbb...........",
+		"bccbbbbb............"
+	};
+	static final Map<Character, Integer> CRYSTAL_PAL = new HashMap<>();
+	static final String[] CRYSTAL = {
+		"..........cc........",
+		".........bcaaaa.....",
+		"......bbbbcaaaaacc..",
+		".....cbbbbcaaaaacb..",
+		"....accbbbcaaaaccb..",
+		"....aacbbbcaaaacbb..",
+		"...aaaccbbcaaaacbbb.",
+		"...aaaac.bcaaaccbbb.",
+		"...aaaacc.caaacbbbb.",
+		"..aaaaaac.c.aacbbb..",
+		"..aaadddddaaaacbb...",
+		".dddd...aaaaa.bb....",
+		".d.....aaaaaa.......",
+		".........aaa........",
+		"...................."
+	};
+	/** Wing styles in the order of the Wardrobe: dragon, angel, butterfly, raven, crystal. */
+	static final String[][] WING_ART = {DRAGON, ANGEL, BUTTERFLY, RAVEN, CRYSTAL};
+	static final java.util.List<Map<Character, Integer>> WING_PALS = java.util.List.of(DRAGON_PAL, ANGEL_PAL, BUTTERFLY_PAL, RAVEN_PAL, CRYSTAL_PAL);
 	static {
 		SWORD_PAL.put('a', 0xFFF8D6); SWORD_PAL.put('b', 0xFBDD6B); SWORD_PAL.put('c', 0xE9B22C); SWORD_PAL.put('d', 0xB8841A); SWORD_PAL.put('e', 0xF4B79A); SWORD_PAL.put('f', 0xE58E6E); SWORD_PAL.put('g', 0x9A7524); SWORD_PAL.put('h', 0x6B4E1A); SWORD_PAL.put('i', 0x4A3412); SWORD_PAL.put('j', 0xD9B23A); SWORD_PAL.put('k', 0x2A1D0A);
-		WING_PAL.put('m', 0xB3232A); WING_PAL.put('n', 0xD2343B); WING_PAL.put('o', 0x8A171D); WING_PAL.put('p', 0x4E1216); WING_PAL.put('q', 0x701A1F);
-		CAPE_PAL.put('1', 0x3C0A0E); CAPE_PAL.put('2', 0xA82832); CAPE_PAL.put('3', 0x7C1118); CAPE_PAL.put('4', 0x911620); CAPE_PAL.put('5', 0xD2565E); CAPE_PAL.put('6', 0x4A2A1A); CAPE_PAL.put('7', 0x6E4326); CAPE_PAL.put('8', 0xDDA270); CAPE_PAL.put('9', 0xF2C493); CAPE_PAL.put('w', 0xF7EEDF); CAPE_PAL.put('k', 0x24140F); CAPE_PAL.put('r', 0xE23B3B); CAPE_PAL.put('s', 0xB02A2E); CAPE_PAL.put('t', 0x8A1E22); CAPE_PAL.put('u', 0xC98A60);
+		GILL_PAL.put('a', 0xE8669A); GILL_PAL.put('b', 0xD13F78); GILL_PAL.put('c', 0xF78FB8);
+		DRAGON_PAL.put('m', 0xB3232A); DRAGON_PAL.put('n', 0xD2343B); DRAGON_PAL.put('o', 0x8A171D); DRAGON_PAL.put('p', 0x4E1216); DRAGON_PAL.put('q', 0x701A1F);
+		ANGEL_PAL.put('a', 0xF6F9FC); ANGEL_PAL.put('b', 0xDCE5EF); ANGEL_PAL.put('c', 0xAEBCCD); ANGEL_PAL.put('d', 0xFFE9A6);
+		BUTTERFLY_PAL.put('o', 0x1E1018); BUTTERFLY_PAL.put('a', 0xFF9D1F); BUTTERFLY_PAL.put('b', 0xFFC94A); BUTTERFLY_PAL.put('w', 0xFFF6DC); BUTTERFLY_PAL.put('r', 0xD9531E);
+		RAVEN_PAL.put('a', 0x2A2833); RAVEN_PAL.put('b', 0x3C3A4E); RAVEN_PAL.put('c', 0x14131A); RAVEN_PAL.put('d', 0x7A5BD6);
+		CRYSTAL_PAL.put('a', 0x74E8F6); CRYSTAL_PAL.put('b', 0x36B5D2); CRYSTAL_PAL.put('c', 0xD9FCFF); CRYSTAL_PAL.put('d', 0x1C7C9A);
 	}
 	private CosmeticArt() { }
 }

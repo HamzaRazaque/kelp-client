@@ -20,61 +20,55 @@ final class CosmeticModels {
 	}
 
 	private static int[] axoCols(int v) {
-		return new int[]{Colors.shift(0xFFF4B3CC, v), Colors.shift(0xFFFFDDE9, v), Colors.shift(0xFFE0568A, v), Colors.shift(0xFFC73A74, v), Colors.shift(0xFFF9C6DA, v)};
+		return new int[]{Colors.shift(0xFFF7B3CD, v), Colors.shift(0xFFFFDDE9, v), Colors.shift(0xFFE8669A, v), Colors.shift(0xFFD13F78, v), Colors.shift(0xFFF9C6DA, v)};
 	}
 
-	/** Head, body, legs and fin (the still parts of the axolotl). */
+	/** Head, body, legs and fin of the axolotl: pink, wide blocky head, dark side eyes, little smile. */
 	static VoxelModel axolotl(int v) {
 		return get("axo" + v, () -> {
 			int[] k = axoCols(v);
-			int body = k[0], belly = k[1], fin = k[4], dark = 0xFF2A1030;
+			int body = k[0], belly = k[1], fin = k[4], dark = 0xFF2A1030, mouth = Colors.shift(0xFFD9709A, v);
 			VoxelModel m = new VoxelModel();
-			m.box(-3f, -2.2f, -4.6f, 3f, 0f, -0.4f, body);
-			m.box(-2.6f, -2.5f, -4.2f, 2.6f, -2.2f, -0.8f, body);
-			m.box(-2.5f, -2f, -0.5f, 2.5f, 0f, 5.2f, body);
-			m.box(-1.8f, -0.5f, -0.5f, 1.8f, 0f, 5.2f, belly);
-			m.box(-2.2f, -0.9f, -4.7f, 2.2f, -0.6f, -4.55f, 0xFFD9809F);
-			m.box(-2.4f, -1.1f, -4.7f, -2.2f, -0.8f, -4.55f, 0xFFD9809F);
-			m.box(2.2f, -1.1f, -4.7f, 2.4f, -0.8f, -4.55f, 0xFFD9809F);
-			m.box(-2.3f, -2.9f, -3.6f, -1.5f, -2.4f, -2.8f, dark);
-			m.box(1.5f, -2.9f, -3.6f, 2.3f, -2.4f, -2.8f, dark);
-			m.box(-2.0f, -2.95f, -3.5f, -1.7f, -2.85f, -3.2f, 0xFFFFFFFF);
-			m.box(1.7f, -2.95f, -3.5f, 2.0f, -2.85f, -3.2f, 0xFFFFFFFF);
-			m.box(-0.15f, -3.0f, 0.6f, 0.15f, -2.0f, 5.2f, fin);
+			m.box(-3.4f, -3.4f, -4.6f, 3.4f, 0f, -0.2f, body);      // big square head
+			m.box(-2.6f, -3.0f, -0.2f, 2.6f, 0f, 5.4f, body);        // body
+			m.box(-2.0f, -0.6f, -0.2f, 2.0f, 0f, 5.4f, belly);
+			m.box(-1.3f, -1.1f, -4.7f, 1.3f, -0.8f, -4.5f, mouth);   // small mouth
+			m.box(-1.6f, -1.4f, -4.7f, -1.3f, -1.1f, -4.5f, mouth);
+			m.box(1.3f, -1.4f, -4.7f, 1.6f, -1.1f, -4.5f, mouth);
+			// eyes sit at the sides of the front of the head
+			m.box(-2.7f, -2.5f, -4.7f, -1.7f, -1.3f, -4.5f, dark);
+			m.box(1.7f, -2.5f, -4.7f, 2.7f, -1.3f, -4.5f, dark);
+			m.box(-0.25f, -3.4f, -3f, 0.25f, -3.8f, 5.4f, fin);
 			for (int i = 0; i < 4; i++) {
-				float x = i % 2 == 0 ? -3.4f : 2.4f, z = i < 2 ? -2.2f : 3.2f;
+				float x = i % 2 == 0 ? -3.5f : 2.5f, z = i < 2 ? -2.0f : 3.4f;
 				m.box(x, -0.2f, z, x + 1f, 0.8f, z + 1.3f, body);
 			}
 			return m;
 		});
 	}
 
-	/** Three feathery gill stalks on one side (sd = -1 or +1); they flutter in the layer. */
+	/** The red-pink gill fans on one side (sd = -1 or +1); they flutter in the layer. */
 	static VoxelModel axolotlGills(int v, int sd) {
 		return get("axog" + v + sd, () -> {
-			int[] k = axoCols(v);
 			VoxelModel m = new VoxelModel();
-			for (int i = 0; i < 3; i++) {
-				float y = -2.1f - i * 0.15f, z = -2.4f + i * 0.9f, lift = i * 0.7f;
-				float x0 = sd * 3f, x1 = sd * (5f - i * 0.2f);
-				m.box(Math.min(x0, x1), y - lift - 0.5f, z, Math.max(x0, x1), y - lift + 0.1f, z + 0.6f, k[2]);
-				float f0 = x1, f1 = x1 + sd * 1.3f;
-				m.box(Math.min(f0, f1), y - lift - 1.4f, z, Math.max(f0, f1), y - lift - 0.8f, z + 0.5f, k[3]);
-				m.box(Math.min(f0, f1), y - lift + 0.1f, z, Math.max(f0, f1), y - lift + 0.7f, z + 0.5f, k[3]);
-			}
+			java.util.Map<Character, Integer> pal = new java.util.HashMap<>();
+			for (java.util.Map.Entry<Character, Integer> e : CosmeticArt.GILL_PAL.entrySet()) pal.put(e.getKey(), e.getValue());
+			// two fans per side, one above the other, like the real thing
+			m.grid(CosmeticArt.GILL, pal, sd * 3.3f, -6.2f, -2.6f, 0.75f, 0.8f, sd, v);
+			m.grid(CosmeticArt.GILL, pal, sd * 3.3f, -3.4f, -1.5f, 0.75f, 0.8f, sd, v);
 			return m;
 		});
 	}
 
-	/** Tail (pivot is at z = 5.2). */
+	/** Tail (pivot is at z = 5.4). */
 	static VoxelModel axolotlTail(int v) {
 		return get("axot" + v, () -> {
 			int[] k = axoCols(v);
 			VoxelModel m = new VoxelModel();
-			m.box(-0.8f, -1.8f, 5.2f, 0.8f, 0f, 7.4f, k[0]);
-			m.box(-0.5f, -1.3f, 7.4f, 0.5f, 0f, 10f, k[0]);
-			m.box(-0.15f, -3.0f, 5.2f, 0.15f, -1.8f, 7.4f, k[4]);
-			m.box(-0.15f, -2.2f, 7.4f, 0.15f, -1.2f, 10f, k[4]);
+			m.box(-1.0f, -2.4f, 5.4f, 1.0f, 0f, 7.8f, k[0]);
+			m.box(-0.6f, -1.6f, 7.8f, 0.6f, 0f, 10.6f, k[0]);
+			m.box(-0.25f, -3.8f, 5.4f, 0.25f, -2.4f, 7.8f, k[4]);
+			m.box(-0.25f, -2.8f, 7.8f, 0.25f, -1.6f, 10.6f, k[4]);
 			return m;
 		});
 	}
@@ -131,8 +125,47 @@ final class CosmeticModels {
 		return get("sword" + v, () -> new VoxelModel().grid(CosmeticArt.SWORD, CosmeticArt.SWORD_PAL, 9f, -2f, 4.4f, 1.1f, 1.2f, -1, v));
 	}
 
-	static VoxelModel wing(int v, boolean right) {
-		return get("wing" + v + right, () -> new VoxelModel().grid(CosmeticArt.WING, CosmeticArt.WING_PAL, 0f, -11f, 0f, 1.1f, 1f, right ? -1 : 1, v));
+	/** style: 0 dragon, 1 angel, 2 butterfly, 3 raven, 4 crystal. */
+	static VoxelModel wing(int style, int v, boolean right) {
+		return get("wing" + style + "_" + v + right, () -> new VoxelModel().grid(CosmeticArt.WING_ART[style], CosmeticArt.WING_PALS.get(style), 0f, -11f, 0f, 1.1f, 1f, right ? -1 : 1, v));
+	}
+
+	// ---- more hats (origin: top of the head at y = -8.5) ----
+	static VoxelModel crown() {
+		return get("crown", () -> {
+			int gold = 0xFFF2C230, dark = 0xFFB8860B;
+			VoxelModel m = new VoxelModel().box(-4.5f, -10.4f, -4.5f, 4.5f, -8.5f, 4.5f, gold).box(-4.6f, -9.2f, -4.6f, 4.6f, -8.9f, 4.6f, dark);
+			for (int i = -1; i <= 1; i++) for (int sd = -1; sd <= 1; sd += 2) {
+				m.box(i * 3.2f - 0.7f, -12.6f, sd * 4f - 0.5f, i * 3.2f + 0.7f, -10.4f, sd * 4f + 0.5f, gold);
+			}
+			m.box(-4.5f, -12.4f, -0.7f, -3.6f, -10.4f, 0.7f, gold).box(3.6f, -12.4f, -0.7f, 4.5f, -10.4f, 0.7f, gold);
+			m.box(-0.8f, -10.0f, -4.7f, 0.8f, -9.0f, -4.5f, 0xFFE5484D).box(-3.2f, -10.0f, -4.7f, -2.0f, -9.0f, -4.5f, 0xFF4AA3F0).box(2.0f, -10.0f, -4.7f, 3.2f, -9.0f, -4.5f, 0xFF3CD16B);
+			return m;
+		});
+	}
+
+	static VoxelModel wizardHat() {
+		return get("wizard", () -> {
+			int c1 = 0xFF4B2A86, c2 = 0xFF5E36A8;
+			VoxelModel m = new VoxelModel().box(-6.2f, -9.4f, -6.2f, 6.2f, -8.5f, 6.2f, c1);
+			m.box(-4.6f, -12.4f, -4.6f, 4.6f, -9.4f, 4.6f, c2).box(-4.7f, -10.6f, -4.7f, 4.7f, -9.6f, 4.7f, 0xFFF2C230);
+			m.box(-3.6f, -15.2f, -3.2f, 3.6f, -12.4f, 4.0f, c1).box(-2.6f, -17.6f, -2.6f, 2.6f, -15.2f, 4.6f, c2).box(-1.6f, -19.6f, -1.8f, 1.6f, -17.6f, 5.2f, c1).box(-0.8f, -21.2f, -0.8f, 0.8f, -19.6f, 6.0f, c2);
+			m.box(-1f, -13.6f, -3.3f, 1f, -12.6f, -3.1f, 0xFFFFE680).box(1.6f, -16.0f, -2.7f, 2.6f, -15.2f, -2.5f, 0xFFFFE680);
+			return m;
+		});
+	}
+
+	static VoxelModel catEars() {
+		return get("catears", () -> {
+			int fur = 0xFF2B2B33, in = 0xFFF7A8C8;
+			VoxelModel m = new VoxelModel().box(-4.3f, -9.0f, -4.4f, 4.3f, -8.5f, -3.4f, fur);
+			for (int sd = -1; sd <= 1; sd += 2) {
+				float x = sd * 2.8f;
+				m.box(x - 1.6f, -10.0f, -4.6f, x + 1.6f, -8.5f, -3.2f, fur).box(x - 1.1f, -11.4f, -4.4f, x + 1.1f, -10.0f, -3.4f, fur).box(x - 0.5f, -12.4f, -4.2f, x + 0.5f, -11.4f, -3.6f, fur);
+				m.box(x - 0.7f, -10.0f, -4.7f, x + 0.7f, -8.9f, -4.6f, in);
+			}
+			return m;
+		});
 	}
 
 	private CosmeticModels() { }
