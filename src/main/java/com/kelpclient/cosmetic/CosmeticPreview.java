@@ -18,7 +18,7 @@ public final class CosmeticPreview {
 				return;
 			case "wings": {
 				int half = w / 2;
-				grid(c, CosmeticArt.WING, CosmeticArt.WING_PAL, x, y, half * 2, h, true, hue, -1);
+				grid(c, CosmeticArt.DRAGON, CosmeticArt.DRAGON_PAL, x, y, half * 2, h, true, hue, -1);
 				return;
 			}
 			case "customcape": {
